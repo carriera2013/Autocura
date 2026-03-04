@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>AutoCura</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f; --surface: #14141e; --surface2: #1c1c2e; --surface3: #242438;
+    --accent: #4f8ef7; --accent2: #7c5cfc; --green: #34c759; --orange: #ff9500; --red: #ff3b30;
+    --text: #f0f0f8; --text2: #9090b0; --text3: #606080;
+    --border: rgba(255,255,255,0.07); --radius: 18px; --radius-sm: 12px;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  body { font-family:'Outfit',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; max-width:430px; margin:0 auto; overflow-x:hidden; padding-bottom:90px; }
+  body::before { content:''; position:fixed; top:-200px; left:-100px; width:500px; height:500px; background:radial-gradient(circle,rgba(79,142,247,0.1) 0%,transparent 70%); pointer-events:none; z-index:0; }
+  .header { padding:56px 24px 16px; position:relative; z-index:1; }
+  .header-top { display:flex; justify-content:space-between; align-items:flex-start; }
+  .greeting { font-size:14px; color:var(--text2); }
+  .title { font-size:28px; font-weight:700; letter-spacing:-0.5px; }
+  .title span { background:linear-gradient(135deg,#4f8ef7,#7c5cfc); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+  .add-btn { width:40px; height:40px; background:linear-gradient(135deg,var(--accent),var(--accent2)); border:none; border-radius:50%; color:white; font-size:22px; cursor:pointer; display:flex; align-items:center; justify-content:center; box-shadow:0 4px 20px rgba(79,142,247,0.4); transition:transform 0.15s; flex-shrink:0; }
+  .add-btn:active { transform:scale(0.9); }
+  .search-bar { margin:0 24px 20px; background:var(--surface2); border-radius:var(--radius-sm); border:1px solid var(--border); display:flex; align-items:center; gap:10px; padding:12px 16px; }
+  .search-bar input { background:none; border:none; color:var(--text); font-family:inherit; font-size:15px; flex:1; outline:none; }
+  .search-bar input::placeholder { color:var(--text3); }
+  .stats-row { display:flex; gap:12px; padding:0 24px; margin-bottom:24px; }
+  .stat-card { flex:1; background:var(--surface2); border:1px solid var(--border); border-radius:var(--radius-sm); padding:14px; text-align:center; }
+  .stat-value { font-size:22px; font-weight:700; margin-bottom:2px; }
+  .stat-label { font-size:11px; color:var(--text2); font-weight:500; }
+  .section { margin-bottom:28px; position:relative; z-index:1; }
+  .section-header { display:flex; justify-content:space-between; align-items:center; padding:0 24px; margin-bottom:14px; }
+  .section-title { font-size:18px; font-weight:600; }
+  .see-all { font-size:13px; color:var(--accent); font-weight:500; cursor:pointer; }
+  .cars-scroll { display:flex; gap:14px; padding:0 24px; overflow-x:auto; scrollbar-width:none; }
+  .cars-scroll::-webkit-scrollbar { display:none; }
+  .car-card { min-width:200px; width:200px; background:var(--surface2); border-radius:var(--radius); border:1px solid var(--border); cursor:pointer; transition:transform 0.2s; position:relative; overflow:hidden; flex-shrink:0; }
+  .car-card:active { transform:scale(0.97); }
+  .car-card.selected { border-color:rgba(79,142,247,0.6); }
+  .car-photo-wrap { width:100%; height:120px; background:var(--surface3); position:relative; overflow:hidden; display:flex; align-items:center; justify-content:center; }
+  .car-photo-wrap img { width:100%; height:100%; object-fit:cover; display:block; }
+  .car-photo-placeholder { font-size:48px; opacity:0.35; }
+  .car-photo-gradient { position:absolute; bottom:0; left:0; right:0; height:50px; background:linear-gradient(transparent,var(--surface2)); }
+  .car-urgency-dot { position:absolute; top:8px; right:8px; width:10px; height:10px; border-radius:50%; border:2px solid var(--surface2); }
+  .car-info { padding:12px 14px 14px; }
+  .car-name { font-size:15px; font-weight:600; margin-bottom:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .car-plate { font-size:10px; color:var(--text2); font-weight:600; background:var(--surface3); border-radius:5px; padding:2px 7px; display:inline-block; letter-spacing:1px; margin-bottom:8px; }
+  .car-km { font-size:12px; color:var(--text2); }
+  .car-km strong { color:var(--text); }
+  .photo-upload-btn { position:absolute; bottom:8px; right:8px; width:28px; height:28px; border-radius:50%; background:rgba(0,0,0,0.6); border:1px solid rgba(255,255,255,0.2); color:white; font-size:13px; cursor:pointer; display:flex; align-items:center; justify-content:center; z-index:10; backdrop-filter:blur(4px); }
+  .alerts-list { padding:0 24px; display:flex; flex-direction:column; gap:10px; }
+  .alert-item { background:var(--surface2); border-radius:var(--radius-sm); border:1px solid var(--border); padding:14px 16px; display:flex; align-items:center; gap:14px; }
+  .alert-icon { width:40px; height:40px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0; }
+  .alert-icon.red { background:rgba(255,59,48,0.15); }
+  .alert-icon.orange { background:rgba(255,149,0,0.15); }
+  .alert-icon.green { background:rgba(52,199,89,0.15); }
+  .alert-info { flex:1; }
+  .alert-title { font-size:14px; font-weight:600; margin-bottom:2px; }
+  .alert-sub { font-size:12px; color:var(--text2); }
+  .alert-badge { font-size:11px; font-weight:600; padding:3px 8px; border-radius:20px; white-space:nowrap; }
+  .badge-red { background:rgba(255,59,48,0.2); color:var(--red); }
+  .badge-orange { background:rgba(255,149,0,0.2); color:var(--orange); }
+  .badge-green { background:rgba(52,199,89,0.2); color:var(--green); }
+  .history-list { padding:0 24px; display:flex; flex-direction:column; gap:10px; }
+  .history-item { background:var(--surface2); border-radius:var(--radius-sm); border:1px solid var(--border); padding:14px 16px; display:flex; align-items:center; gap:12px; }
+  .history-thumb { width:38px; height:38px; border-radius:10px; background:var(--surface3); overflow:hidden; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:16px; }
+  .history-thumb img { width:100%; height:100%; object-fit:cover; }
+  .history-info { flex:1; min-width:0; }
+  .history-title { font-size:14px; font-weight:500; margin-bottom:2px; }
+  .history-meta { font-size:12px; color:var(--text2); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .history-cost { font-size:14px; font-weight:600; color:var(--accent); white-space:nowrap; }
+  .history-actions { display:flex; gap:6px; flex-shrink:0; margin-left:2px; }
+  .btn-icon { width:32px; height:32px; border-radius:9px; border:none; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:14px; transition:transform 0.15s; }
+  .btn-icon:active { transform:scale(0.9); }
+  .btn-edit { background:rgba(79,142,247,0.15); }
+  .btn-delete { background:rgba(255,59,48,0.12); }
+  .btn-danger { width:100%; padding:14px; background:rgba(255,59,48,0.12); border:1px solid rgba(255,59,48,0.2); border-radius:var(--radius-sm); color:var(--red); font-family:inherit; font-size:15px; font-weight:600; cursor:pointer; margin-top:6px; }
+  .btn-danger:active { background:rgba(255,59,48,0.22); }
+  .bottom-nav { position:fixed; bottom:0; left:50%; transform:translateX(-50%); width:100%; max-width:430px; background:rgba(20,20,30,0.9); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px); border-top:1px solid var(--border); display:flex; align-items:center; justify-content:space-around; padding:12px 0 28px; z-index:100; }
+  .nav-item { display:flex; flex-direction:column; align-items:center; gap:4px; cursor:pointer; padding:4px 16px; }
+  .nav-icon { font-size:22px; }
+  .nav-label { font-size:10px; font-weight:500; color:var(--text3); }
+  .nav-item.active .nav-label { color:var(--accent); }
+  .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.75); backdrop-filter:blur(8px); z-index:200; display:flex; align-items:flex-end; opacity:0; pointer-events:none; transition:opacity 0.3s; }
+  .modal-overlay.open { opacity:1; pointer-events:all; }
+  .modal { background:var(--surface); border-radius:24px 24px 0 0; width:100%; max-width:430px; margin:0 auto; padding:20px 24px 44px; transform:translateY(100%); transition:transform 0.35s cubic-bezier(0.32,0.72,0,1); max-height:88vh; overflow-y:auto; }
+  .modal-overlay.open .modal { transform:translateY(0); }
+  .modal-handle { width:36px; height:4px; background:var(--surface3); border-radius:2px; margin:0 auto 20px; }
+  .modal-title { font-size:20px; font-weight:700; margin-bottom:20px; }
+  .photo-picker { width:100%; height:160px; background:var(--surface2); border-radius:var(--radius); border:2px dashed var(--surface3); display:flex; flex-direction:column; align-items:center; justify-content:center; cursor:pointer; margin-bottom:16px; position:relative; overflow:hidden; transition:border-color 0.2s; }
+  .photo-picker:active { border-color:var(--accent); }
+  .photo-picker img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
+  .photo-picker-label { font-size:13px; color:var(--text2); margin-top:8px; pointer-events:none; position:relative; z-index:1; }
+  .photo-picker-icon { font-size:32px; pointer-events:none; position:relative; z-index:1; }
+  .photo-picker.has-photo .photo-picker-icon, .photo-picker.has-photo .photo-picker-label { display:none; }
+  .photo-overlay-btn { position:absolute; bottom:10px; right:10px; z-index:2; background:rgba(0,0,0,0.6); border:none; color:white; border-radius:20px; padding:6px 12px; font-size:12px; font-weight:600; cursor:pointer; }
+  .form-group { margin-bottom:14px; }
+  .form-label { font-size:11px; color:var(--text2); font-weight:600; margin-bottom:6px; display:block; text-transform:uppercase; letter-spacing:0.5px; }
+  .form-input { width:100%; background:var(--surface2); border:1px solid var(--border); border-radius:var(--radius-sm); color:var(--text); font-family:inherit; font-size:15px; padding:12px 14px; outline:none; transition:border-color 0.2s; }
+  .form-input:focus { border-color:var(--accent); }
+  .form-select { width:100%; background:var(--surface2); border:1px solid var(--border); border-radius:var(--radius-sm); color:var(--text); font-family:inherit; font-size:15px; padding:12px 14px; outline:none; appearance:none; }
+  .form-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .btn-primary { width:100%; padding:15px; background:linear-gradient(135deg,var(--accent),var(--accent2)); border:none; border-radius:var(--radius-sm); color:white; font-family:inherit; font-size:16px; font-weight:600; cursor:pointer; margin-top:8px; box-shadow:0 4px 20px rgba(79,142,247,0.3); transition:transform 0.15s; }
+  .btn-primary:active { transform:scale(0.98); }
+  .page { display:none; }
+  .page.active { display:block; }
+  .empty-state { text-align:center; padding:40px 24px; color:var(--text3); }
+  .empty-state .emoji { font-size:44px; margin-bottom:12px; }
+  .empty-state p { font-size:15px; }
+  .progress-bar { background:var(--surface3); border-radius:4px; height:4px; overflow:hidden; margin-top:6px; }
+  .progress-fill { height:100%; border-radius:4px; }
+  .print-btn { width:40px; height:40px; background:var(--surface2); border:1px solid var(--border); border-radius:50%; color:var(--text); font-size:18px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:transform 0.15s,background 0.15s; flex-shrink:0; }
+  .print-btn:active { transform:scale(0.9); background:var(--surface3); }
+  @media print {
+    body { background:#fff !important; color:#111 !important; max-width:100% !important; padding:0 !important; }
+    .bottom-nav, .add-btn, .print-btn, .history-actions, .search-bar, .stats-row, .header .greeting { display:none !important; }
+    .page { display:none !important; }
+    #print-area { display:block !important; }
+    .header { padding:20px 20px 10px !important; }
+    .title { font-size:22px !important; color:#111 !important; }
+    .title span { -webkit-text-fill-color:#333 !important; background:none !important; color:#333 !important; }
+    #print-area table { width:100%; border-collapse:collapse; font-family:Arial,sans-serif; font-size:12px; }
+    #print-area th { background:#f0f0f0; border:1px solid #ccc; padding:8px 10px; text-align:left; font-weight:700; color:#333; }
+    #print-area td { border:1px solid #ddd; padding:7px 10px; color:#222; vertical-align:top; }
+    #print-area tr:nth-child(even) td { background:#fafafa; }
+    #print-area .print-title { font-size:20px; font-weight:700; margin-bottom:4px; color:#111; }
+    #print-area .print-meta { font-size:12px; color:#666; margin-bottom:16px; }
+    #print-area .print-total { font-size:14px; font-weight:700; margin-top:14px; text-align:right; color:#333; }
+    #print-area .print-car-section { margin-bottom:24px; page-break-inside:avoid; }
+    #print-area .print-car-title { font-size:15px; font-weight:700; margin-bottom:8px; border-bottom:2px solid #333; padding-bottom:4px; }
+  }
+  #print-area { display:none; }
+  .toast { position:fixed; top:60px; left:50%; transform:translateX(-50%) translateY(-80px); background:var(--green); color:white; padding:10px 20px; border-radius:20px; font-size:14px; font-weight:600; z-index:300; transition:transform 0.3s; white-space:nowrap; }
+  .toast.show { transform:translateX(-50%) translateY(0); }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+  .section { animation:fadeUp 0.35s ease both; }
+  .section:nth-child(3){animation-delay:0.05s} .section:nth-child(4){animation-delay:0.1s} .section:nth-child(5){animation-delay:0.15s}
+  input[type="file"] { display:none; }
+</style>
+</head>
+<body>
+
+<div class="toast" id="toast"></div>
+<input type="file" id="file-car-photo" accept="image/*" onchange="handleCarPhotoModal(event)">
+<input type="file" id="file-card-photo" accept="image/*">
+
+<!-- HOME -->
+<div class="page active" id="page-home">
+  <div class="header">
+    <div class="header-top">
+      <div><div class="greeting" id="main-greeting" onclick="openNameModal()" style="cursor:pointer" title="Tocca per modificare il nome">Bentornato 👋</div><div class="title">Le tue <span>Auto</span></div></div>
+      <button class="add-btn" onclick="openModal('modal-add-car')">+</button>
+    </div>
+  </div>
+  <div class="search-bar">
+    <span style="font-size:16px;color:var(--text3)">🔍</span>
+    <input type="text" placeholder="Cerca veicolo o intervento..." oninput="filterHistory(this.value)">
+  </div>
+  <div class="stats-row">
+    <div class="stat-card"><div class="stat-value" id="stat-cars">0</div><div class="stat-label">Veicoli</div></div>
+    <div class="stat-card"><div class="stat-value" id="stat-alerts" style="color:var(--orange)">0</div><div class="stat-label">Scadenze</div></div>
+    <div class="stat-card"><div class="stat-value" id="stat-cost" style="color:var(--accent)">€0</div><div class="stat-label">Speso</div></div>
+  </div>
+  <div class="section">
+    <div class="section-header"><div class="section-title">Veicoli</div><div class="see-all" onclick="openModal('modal-add-car')">+ Aggiungi</div></div>
+    <div class="cars-scroll" id="cars-container"></div>
+  </div>
+  <div class="section">
+    <div class="section-header"><div class="section-title">⚠️ Scadenze</div></div>
+    <div class="alerts-list" id="alerts-container"></div>
+  </div>
+  <div class="section">
+    <div class="section-header"><div class="section-title">Cronologia</div><div class="see-all" onclick="switchPage('page-history','nav-history')">Vedi tutto</div></div>
+    <div class="history-list" id="history-home"></div>
+  </div>
+</div>
+
+<!-- HISTORY -->
+<div class="page" id="page-history">
+  <div class="header">
+    <div class="header-top">
+      <div><div class="greeting">Tutti gli interventi</div><div class="title">📋 <span>Storico</span></div></div>
+      <div style="display:flex;gap:10px;align-items:center">
+        <button class="print-btn" onclick="printHistory()" title="Stampa storico">🖨️</button>
+        <button class="add-btn" onclick="openModal('modal-add-event')">+</button>
+      </div>
+    </div>
+  </div>
+  <div class="history-list" id="history-full"></div>
+</div>
+
+<!-- STATS -->
+<div class="page" id="page-stats">
+  <div class="header">
+    <div class="header-top">
+      <div><div class="greeting">Panoramica spese</div><div class="title">📊 <span>Statistiche</span></div></div>
+    </div>
+  </div>
+  <div id="stats-content" style="padding:0 24px"></div>
+</div>
+
+<nav class="bottom-nav">
+  <div class="nav-item active" id="nav-home" onclick="switchPage('page-home','nav-home')"><div class="nav-icon">🏠</div><div class="nav-label">Home</div></div>
+  <div class="nav-item" id="nav-add" onclick="openModal('modal-add-event')"><div class="nav-icon">➕</div><div class="nav-label">Intervento</div></div>
+  <div class="nav-item" id="nav-history" onclick="switchPage('page-history','nav-history')"><div class="nav-icon">📋</div><div class="nav-label">Storico</div></div>
+  <div class="nav-item" id="nav-stats" onclick="switchPage('page-stats','nav-stats')"><div class="nav-icon">📊</div><div class="nav-label">Stats</div></div>
+</nav>
+
+<!-- MODAL ADD CAR -->
+<div class="modal-overlay" id="modal-add-car" onclick="closeModalOutside(event,'modal-add-car')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">🚗 Aggiungi Veicolo</div>
+    <div class="photo-picker" id="photo-picker" onclick="document.getElementById('file-car-photo').click()">
+      <div class="photo-picker-icon">📷</div>
+      <div class="photo-picker-label">Tocca per aggiungere una foto</div>
+    </div>
+    <div class="form-group"><label class="form-label">Marca e Modello</label><input class="form-input" id="car-name" placeholder="Es. Fiat 500, BMW Serie 3..." type="text"></div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Targa</label><input class="form-input" id="car-plate" placeholder="AB 123 CD" type="text" style="text-transform:uppercase"></div>
+      <div class="form-group"><label class="form-label">Anno</label><input class="form-input" id="car-year" placeholder="2020" type="number"></div>
+    </div>
+    <div class="form-group"><label class="form-label">Chilometraggio attuale</label><input class="form-input" id="car-km" placeholder="Es. 45000" type="number"></div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Scad. Revisione</label><input class="form-input" id="car-revision" type="date"></div>
+      <div class="form-group"><label class="form-label">Scad. Assicurazione</label><input class="form-input" id="car-insurance" type="date"></div>
+    </div>
+    <button class="btn-primary" onclick="addCar()">Salva Veicolo</button>
+  </div>
+</div>
+
+<!-- MODAL ADD EVENT -->
+<div class="modal-overlay" id="modal-add-event" onclick="closeModalOutside(event,'modal-add-event')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">🔧 Nuovo Intervento</div>
+    <div class="form-group"><label class="form-label">Veicolo</label><select class="form-select" id="event-car"></select></div>
+    <div class="form-group"><label class="form-label">Tipo intervento</label>
+      <select class="form-select" id="event-type">
+        <option value="🛢️ Cambio olio">🛢️ Cambio olio</option>
+        <option value="🔋 Batteria">🔋 Batteria</option>
+        <option value="🦺 Gomme">🦺 Gomme</option>
+        <option value="🧊 Liquido freni">🧊 Liquido freni</option>
+        <option value="⚙️ Freni">⚙️ Freni</option>
+        <option value="💡 Lampadine">💡 Lampadine</option>
+        <option value="🔧 Meccanica generica">🔧 Meccanica generica</option>
+        <option value="🧴 Filtro aria">🧴 Filtro aria</option>
+        <option value="🏁 Revisione">🏁 Revisione</option>
+        <option value="🛡️ Assicurazione">🛡️ Assicurazione</option>
+        <option value="💊 Altro">💊 Altro</option>
+      </select>
+    </div>
+    <div class="form-group"><label class="form-label">Note (opzionale)</label><input class="form-input" id="event-note" placeholder="Descrizione..." type="text"></div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Data</label><input class="form-input" id="event-date" type="date"></div>
+      <div class="form-group"><label class="form-label">Costo (€)</label><input class="form-input" id="event-cost" placeholder="0,00" type="number" step="0.01"></div>
+    </div>
+    <div class="form-group"><label class="form-label">Km al momento</label><input class="form-input" id="event-km" placeholder="Es. 50000" type="number"></div>
+    <button class="btn-primary" onclick="addEvent()">Salva Intervento</button>
+  </div>
+</div>
+
+<script>
+  let cars = JSON.parse(localStorage.getItem('autocura_cars') || '[]');
+  let events = JSON.parse(localStorage.getItem('autocura_events') || '[]');
+  let pendingPhoto = null;
+
+  function save() {
+    localStorage.setItem('autocura_cars', JSON.stringify(cars));
+    localStorage.setItem('autocura_events', JSON.stringify(events));
+  }
+
+  // USERNAME
+  let username = localStorage.getItem('autocura_username') || '';
+
+  function getGreeting() {
+    const h = new Date().getHours();
+    if (h >= 5 && h < 12) return 'Buongiorno';
+    if (h >= 12 && h < 18) return 'Buon pomeriggio';
+    return 'Buonasera';
+  }
+
+  function updateGreeting() {
+    const el = document.getElementById('main-greeting');
+    if (!el) return;
+    const saluto = getGreeting();
+    el.textContent = username ? `${saluto}, ${username}! 👋` : `${saluto} 👋`;
+  }
+
+  function openNameModal() {
+    document.getElementById('username-input').value = username;
+    document.getElementById('modal-username').classList.add('open');
+    setTimeout(() => document.getElementById('username-input').focus(), 350);
+  }
+
+  function saveUsername() {
+    const val = document.getElementById('username-input').value.trim();
+    username = val;
+    localStorage.setItem('autocura_username', username);
+    closeModal('modal-username');
+    updateGreeting();
+    showToast(username ? `Ciao, ${username}!` : 'Nome rimosso');
+  }
+
+  function switchPage(pageId, navId) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.getElementById(pageId).classList.add('active');
+    if (navId) document.getElementById(navId).classList.add('active');
+    if (pageId === 'page-stats') renderStats();
+    if (pageId === 'page-history') renderHistoryFull();
+    window.scrollTo(0, 0);
+  }
+
+  function openModal(id) {
+    if (id === 'modal-add-event') populateCarSelect();
+    document.getElementById(id).classList.add('open');
+    document.querySelectorAll('#' + id + ' input[type="date"]').forEach(d => { if (!d.value) d.value = new Date().toISOString().split('T')[0]; });
+  }
+  function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+  function closeModalOutside(e, id) { if (e.target.id === id) closeModal(id); }
+
+  function compressImage(file, callback) {
+    const reader = new FileReader();
+    reader.onload = ev => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const MAX = 700;
+        let w = img.width, h = img.height;
+        if (w > h) { if (w > MAX) { h = h*MAX/w; w = MAX; } } else { if (h > MAX) { w = w*MAX/h; h = MAX; } }
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        callback(canvas.toDataURL('image/jpeg', 0.78));
+      };
+      img.src = ev.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function handleCarPhotoModal(e) {
+    const file = e.target.files[0]; if (!file) return;
+    compressImage(file, base64 => {
+      pendingPhoto = base64;
+      const picker = document.getElementById('photo-picker');
+      picker.classList.add('has-photo');
+      let img = picker.querySelector('img');
+      if (!img) { img = document.createElement('img'); picker.prepend(img); }
+      img.src = base64;
+      let btn = picker.querySelector('.photo-overlay-btn');
+      if (!btn) {
+        btn = document.createElement('button');
+        btn.className = 'photo-overlay-btn'; btn.textContent = '✏️ Cambia';
+        btn.onclick = ev => { ev.stopPropagation(); document.getElementById('file-car-photo').click(); };
+        picker.appendChild(btn);
+      }
+    });
+    e.target.value = '';
+  }
+
+  function updateCardPhoto(carIdx) {
+    const input = document.getElementById('file-card-photo');
+    input.onchange = e => {
+      const file = e.target.files[0]; if (!file) return;
+      compressImage(file, base64 => { cars[carIdx].photo = base64; save(); renderCars(); showToast('Foto aggiornata!'); });
+      input.value = '';
+    };
+    input.click();
+  }
+
+  function addCar() {
+    const name = document.getElementById('car-name').value.trim();
+    if (!name) { alert('Inserisci il nome del veicolo'); return; }
+    cars.push({ name, plate: document.getElementById('car-plate').value.toUpperCase().trim(), year: document.getElementById('car-year').value, km: parseInt(document.getElementById('car-km').value)||0, revision: document.getElementById('car-revision').value, insurance: document.getElementById('car-insurance').value, photo: pendingPhoto||null });
+    save(); closeModal('modal-add-car');
+    ['car-name','car-plate','car-year','car-km','car-revision','car-insurance'].forEach(id => document.getElementById(id).value = '');
+    const picker = document.getElementById('photo-picker');
+    picker.classList.remove('has-photo');
+    const img = picker.querySelector('img'); if (img) img.remove();
+    const btn = picker.querySelector('.photo-overlay-btn'); if (btn) btn.remove();
+    pendingPhoto = null;
+    render(); showToast('Veicolo aggiunto!');
+  }
+
+  function populateCarSelect() {
+    const sel = document.getElementById('event-car');
+    sel.innerHTML = cars.length ? cars.map((c,i) => `<option value="${i}">${c.name}${c.plate?' · '+c.plate:''}</option>`).join('') : '<option>Nessun veicolo</option>';
+  }
+
+  function addEvent() {
+    if (!cars.length) { alert('Prima aggiungi un veicolo'); return; }
+    const carIdx = parseInt(document.getElementById('event-car').value);
+    const ev = { carIdx, type: document.getElementById('event-type').value, note: document.getElementById('event-note').value, date: document.getElementById('event-date').value, cost: parseFloat(document.getElementById('event-cost').value)||0, km: parseInt(document.getElementById('event-km').value)||0 };
+    events.unshift(ev);
+    if (ev.km > cars[carIdx].km) cars[carIdx].km = ev.km;
+    save(); closeModal('modal-add-event');
+    ['event-note','event-cost','event-km'].forEach(id => document.getElementById(id).value = '');
+    render(); showToast('Intervento salvato!');
+  }
+
+  function renderCars() {
+    const container = document.getElementById('cars-container');
+    if (!cars.length) {
+      container.innerHTML = `<div class="car-card" style="cursor:pointer;opacity:0.5;min-width:160px" onclick="openModal('modal-add-car')"><div class="car-photo-wrap"><div class="car-photo-placeholder">➕</div></div><div class="car-info"><div class="car-name">Aggiungi Auto</div></div></div>`;
+      return;
+    }
+    container.innerHTML = cars.map((c,i) => {
+      const urg = getCarUrgency(c);
+      const dotColor = urg==='ok'?'var(--green)':urg==='warn'?'var(--orange)':'var(--red)';
+      return `<div class="car-card" onclick="selectCar(${i})">
+        <div class="car-photo-wrap">
+          ${c.photo ? `<img src="${c.photo}" alt="${c.name}">` : '<div class="car-photo-placeholder">🚗</div>'}
+          <div class="car-photo-gradient"></div>
+          <div class="car-urgency-dot" style="background:${dotColor}"></div>
+          <button class="photo-upload-btn" onclick="event.stopPropagation();updateCardPhoto(${i})">📷</button>
+        </div>
+        <div class="car-info">
+          <div class="car-name">${c.name}</div>
+          ${c.plate?`<div class="car-plate">${c.plate}</div>`:''}
+          <div class="car-km">Km: <strong>${c.km.toLocaleString('it-IT')}</strong></div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  function getCarUrgency(car) {
+    const today = new Date();
+    const chk = ds => { if (!ds) return 'ok'; const diff=(new Date(ds)-today)/86400000; return diff<0?'critical':diff<30?'warn':'ok'; };
+    const r=chk(car.revision), ins=chk(car.insurance);
+    if (r==='critical'||ins==='critical') return 'critical';
+    if (r==='warn'||ins==='warn') return 'warn';
+    return 'ok';
+  }
+
+  function selectCar(i) { document.querySelectorAll('.car-card').forEach(c=>c.classList.remove('selected')); document.querySelectorAll('.car-card')[i]?.classList.add('selected'); }
+
+  function renderAlerts() {
+    const container = document.getElementById('alerts-container');
+    const today = new Date(); const list = [];
+    cars.forEach(c => {
+      const chk = (label, ds, icon) => {
+        if (!ds) return; const d=new Date(ds); const diff=Math.round((d-today)/86400000);
+        const level=diff<0?'red':diff<15?'red':diff<30?'orange':diff<60?'orange':null;
+        if (!level) return;
+        list.push({icon, label:`${c.name} — ${label}`, sub:diff<0?'Scaduta il '+d.toLocaleDateString('it-IT'):'Scade il '+d.toLocaleDateString('it-IT'), level, badge:diff<0?'Scaduta':`${diff}gg`});
+      };
+      chk('Revisione',c.revision,'🏁'); chk('Assicurazione',c.insurance,'📋');
+    });
+    document.getElementById('stat-alerts').textContent = list.length;
+    if (!list.length) { container.innerHTML=`<div class="alert-item"><div class="alert-icon green">✅</div><div class="alert-info"><div class="alert-title">Tutto in ordine</div><div class="alert-sub">Nessuna scadenza imminente</div></div></div>`; return; }
+    container.innerHTML = list.map(a=>`<div class="alert-item"><div class="alert-icon ${a.level}">${a.icon}</div><div class="alert-info"><div class="alert-title">${a.label}</div><div class="alert-sub">${a.sub}</div></div><div class="alert-badge badge-${a.level}">${a.badge}</div></div>`).join('');
+  }
+
+  function historyItem(e, idx) {
+    const car = cars[e.carIdx];
+    const thumb = car?.photo ? `<div class="history-thumb"><img src="${car.photo}"></div>` : `<div class="history-thumb">${e.type.split(' ')[0]}</div>`;
+    const carLabel = car ? `${car.name}${car.plate?' · '+car.plate:''}` : 'Veicolo rimosso';
+    const date = e.date ? new Date(e.date).toLocaleDateString('it-IT') : '—';
+    const costHtml = e.cost ? `<div class="history-cost">€${e.cost.toFixed(0)}</div>` : '';
+    return `<div class="history-item">
+      ${thumb}
+      <div class="history-info">
+        <div class="history-title">${e.type.split(' ').slice(1).join(' ')}</div>
+        <div class="history-meta">${carLabel} · ${date}${e.km?' · '+e.km.toLocaleString('it-IT')+' km':''}${e.note?' · '+e.note:''}</div>
+      </div>
+      ${costHtml}
+      <div class="history-actions">
+        <button class="btn-icon btn-edit" onclick="openEditEvent(${idx})" title="Modifica">✏️</button>
+        <button class="btn-icon btn-delete" onclick="confirmDeleteEvent(${idx})" title="Elimina">🗑️</button>
+      </div>
+    </div>`;
+  }
+
+  function renderHistoryHome() {
+    const c = document.getElementById('history-home'); const r=events.slice(0,5);
+    c.innerHTML = r.length ? r.map((e,i)=>historyItem(e,i)).join('') : `<div class="empty-state"><div class="emoji">🔧</div><p>Nessun intervento registrato</p></div>`;
+  }
+
+  function renderHistoryFull(filter='') {
+    const c = document.getElementById('history-full');
+    const f = filter ? events.filter(e=>{ const car=cars[e.carIdx]; return (car&&car.name.toLowerCase().includes(filter))||e.type.toLowerCase().includes(filter); }) : events;
+    c.innerHTML = f.length ? f.map((e,i)=>historyItem(e,events.indexOf(e))).join('') : `<div class="empty-state"><div class="emoji">📭</div><p>Nessun risultato</p></div>`;
+  }
+
+  function filterHistory(val) { renderHistoryFull(val.toLowerCase()); }
+
+  function renderStats() {
+    const container = document.getElementById('stats-content');
+    if (!events.length) { container.innerHTML=`<div class="empty-state"><div class="emoji">📊</div><p>Aggiungi interventi per vedere le statistiche</p></div>`; return; }
+    const total = events.reduce((s,e)=>s+e.cost,0);
+    const byType={};
+    events.forEach(e=>{ const t=e.type.split(' ').slice(1).join(' '); byType[t]=(byType[t]||0)+e.cost; });
+    const sorted=Object.entries(byType).sort((a,b)=>b[1]-a[1]); const maxC=sorted[0]?.[1]||1;
+    const byCar={};
+    events.forEach(e=>{ const c=cars[e.carIdx]; if(!c) return; byCar[c.name]=(byCar[c.name]||0)+e.cost; });
+    const carPhotos = cars.filter(c=>c.photo).slice(0,5).map(c=>`<img src="${c.photo}" style="width:42px;height:42px;border-radius:50%;object-fit:cover;border:2px solid var(--surface);margin-right:-10px">`).join('');
+    container.innerHTML = `
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:20px">
+        ${carPhotos?`<div style="display:flex;margin-bottom:14px;padding-right:10px">${carPhotos}</div>`:''}
+        <div style="font-size:12px;color:var(--text2);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.5px">Totale speso</div>
+        <div style="font-size:40px;font-weight:700;color:var(--accent)">€${total.toFixed(0)}</div>
+        <div style="font-size:13px;color:var(--text2);margin-top:4px">${events.length} interventi · ${cars.length} veicoli</div>
+      </div>
+      <div style="font-size:16px;font-weight:600;margin-bottom:14px">Per tipo intervento</div>
+      ${sorted.map(([t,cost])=>`<div style="margin-bottom:16px"><div style="display:flex;justify-content:space-between;margin-bottom:5px"><span style="font-size:14px">${t}</span><span style="font-size:14px;font-weight:600;color:var(--accent)">€${cost.toFixed(0)}</span></div><div class="progress-bar"><div class="progress-fill" style="width:${(cost/maxC*100).toFixed(0)}%;background:linear-gradient(90deg,var(--accent),var(--accent2))"></div></div></div>`).join('')}
+      ${Object.keys(byCar).length>1?`<div style="font-size:16px;font-weight:600;margin:24px 0 14px">Per veicolo</div>${Object.entries(byCar).sort((a,b)=>b[1]-a[1]).map(([name,cost])=>{ const car=cars.find(c=>c.name===name); return `<div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;background:var(--surface2);padding:12px 14px;border-radius:var(--radius-sm);border:1px solid var(--border)">${car?.photo?`<img src="${car.photo}" style="width:36px;height:36px;border-radius:8px;object-fit:cover;flex-shrink:0">`:'<div style="width:36px;height:36px;background:var(--surface3);border-radius:8px;display:flex;align-items:center;justify-content:center">🚗</div>'}<span style="font-size:14px;flex:1">${name}</span><span style="font-size:14px;font-weight:600;color:var(--accent)">€${cost.toFixed(0)}</span></div>`; }).join('')}`:''}
+      <div style="height:20px"></div>`;
+  }
+
+  function updateStats() {
+    document.getElementById('stat-cars').textContent = cars.length;
+    const total = events.reduce((s,e)=>s+e.cost,0);
+    document.getElementById('stat-cost').textContent = '€'+(total>=1000?(total/1000).toFixed(1)+'k':total.toFixed(0));
+  }
+
+  function showToast(msg) {
+    const t=document.getElementById('toast'); t.textContent='✓ '+msg; t.classList.add('show');
+    setTimeout(()=>t.classList.remove('show'),2500);
+  }
+
+  function printHistory() {
+    const meta = document.getElementById('print-meta');
+    const content = document.getElementById('print-content');
+    const now = new Date().toLocaleDateString('it-IT', {day:'2-digit',month:'long',year:'numeric'});
+    meta.textContent = `Stampato il ${now} · ${events.length} interventi · ${cars.length} veicoli`;
+
+    // Group by car
+    const grouped = {};
+    cars.forEach((c,i) => { grouped[i] = []; });
+    events.forEach(e => {
+      if (grouped[e.carIdx] !== undefined) grouped[e.carIdx].push(e);
+    });
+
+    let html = '';
+    cars.forEach((car, carIdx) => {
+      const evs = grouped[carIdx];
+      if (!evs.length) return;
+      const carTotal = evs.reduce((s,e)=>s+e.cost,0);
+      html += `<div class="print-car-section">
+        <div class="print-car-title">🚗 ${car.name}${car.plate?' — '+car.plate:''}${car.year?' ('+car.year+')':''}</div>
+        <table>
+          <thead><tr><th>Data</th><th>Intervento</th><th>Note</th><th>Km</th><th>Costo</th></tr></thead>
+          <tbody>
+            ${evs.map(e=>`<tr>
+              <td>${e.date?new Date(e.date).toLocaleDateString('it-IT'):'—'}</td>
+              <td>${e.type.split(' ').slice(1).join(' ')}</td>
+              <td>${e.note||'—'}</td>
+              <td>${e.km?e.km.toLocaleString('it-IT')+' km':'—'}</td>
+              <td>${e.cost?'€'+e.cost.toFixed(2):'—'}</td>
+            </tr>`).join('')}
+          </tbody>
+        </table>
+        <div class="print-total">Totale: €${carTotal.toFixed(2)}</div>
+      </div>`;
+    });
+
+    const grandTotal = events.reduce((s,e)=>s+e.cost,0);
+    html += `<div style="text-align:right;font-size:15px;font-weight:700;margin-top:10px;padding-top:10px;border-top:2px solid #333">Totale generale: €${grandTotal.toFixed(2)}</div>`;
+
+    content.innerHTML = html;
+    window.print();
+  }
+
+  let editingEventIdx = null;
+
+  function openEditEvent(idx) {
+    editingEventIdx = idx;
+    const e = events[idx];
+    // populate car select
+    const sel = document.getElementById('edit-event-car');
+    sel.innerHTML = cars.map((c,i) => `<option value="${i}">${c.name}${c.plate?' · '+c.plate:''}</option>`).join('');
+    sel.value = e.carIdx;
+    // populate type
+    document.getElementById('edit-event-type').value = e.type;
+    document.getElementById('edit-event-note').value = e.note || '';
+    document.getElementById('edit-event-date').value = e.date || '';
+    document.getElementById('edit-event-cost').value = e.cost || '';
+    document.getElementById('edit-event-km').value = e.km || '';
+    document.getElementById('modal-edit-event').classList.add('open');
+  }
+
+  function saveEditEvent() {
+    if (editingEventIdx === null) return;
+    const carIdx = parseInt(document.getElementById('edit-event-car').value);
+    events[editingEventIdx] = {
+      carIdx,
+      type: document.getElementById('edit-event-type').value,
+      note: document.getElementById('edit-event-note').value,
+      date: document.getElementById('edit-event-date').value,
+      cost: parseFloat(document.getElementById('edit-event-cost').value)||0,
+      km: parseInt(document.getElementById('edit-event-km').value)||0,
+    };
+    save();
+    closeModal('modal-edit-event');
+    editingEventIdx = null;
+    render();
+    renderHistoryFull();
+    showToast('Intervento aggiornato!');
+  }
+
+  function confirmDeleteEvent(idx) {
+    editingEventIdx = idx;
+    openEditEvent(idx);
+  }
+
+  function deleteEvent() {
+    if (editingEventIdx === null) return;
+    if (!confirm('Eliminare questo intervento?')) return;
+    events.splice(editingEventIdx, 1);
+    save();
+    closeModal('modal-edit-event');
+    editingEventIdx = null;
+    render();
+    renderHistoryFull();
+    showToast('Intervento eliminato');
+  }
+
+  function render() { renderCars(); renderAlerts(); renderHistoryHome(); updateStats(); updateGreeting(); }
+  render();
+</script>
+
+<!-- MODAL EDIT EVENT -->
+<div class="modal-overlay" id="modal-edit-event" onclick="closeModalOutside(event,'modal-edit-event')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">✏️ Modifica Intervento</div>
+    <div class="form-group"><label class="form-label">Veicolo</label><select class="form-select" id="edit-event-car"></select></div>
+    <div class="form-group"><label class="form-label">Tipo intervento</label>
+      <select class="form-select" id="edit-event-type">
+        <option value="🛢️ Cambio olio">🛢️ Cambio olio</option>
+        <option value="🔋 Batteria">🔋 Batteria</option>
+        <option value="🦺 Gomme">🦺 Gomme</option>
+        <option value="🧊 Liquido freni">🧊 Liquido freni</option>
+        <option value="⚙️ Freni">⚙️ Freni</option>
+        <option value="💡 Lampadine">💡 Lampadine</option>
+        <option value="🔧 Meccanica generica">🔧 Meccanica generica</option>
+        <option value="🧴 Filtro aria">🧴 Filtro aria</option>
+        <option value="🏁 Revisione">🏁 Revisione</option>
+        <option value="🛡️ Assicurazione">🛡️ Assicurazione</option>
+        <option value="💊 Altro">💊 Altro</option>
+      </select>
+    </div>
+    <div class="form-group"><label class="form-label">Note (opzionale)</label><input class="form-input" id="edit-event-note" placeholder="Descrizione..." type="text"></div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Data</label><input class="form-input" id="edit-event-date" type="date"></div>
+      <div class="form-group"><label class="form-label">Costo (€)</label><input class="form-input" id="edit-event-cost" placeholder="0,00" type="number" step="0.01"></div>
+    </div>
+    <div class="form-group"><label class="form-label">Km al momento</label><input class="form-input" id="edit-event-km" placeholder="Es. 50000" type="number"></div>
+    <button class="btn-primary" onclick="saveEditEvent()">Salva Modifiche</button>
+    <button class="btn-danger" onclick="deleteEvent()">🗑️ Elimina Intervento</button>
+  </div>
+</div>
+
+
+<div id="print-area">
+  <div style="padding:20px 20px 10px">
+    <div class="print-title">AutoCura — Storico Interventi</div>
+    <div class="print-meta" id="print-meta"></div>
+  </div>
+  <div id="print-content" style="padding:0 20px 20px"></div>
+</div>
+
+
+<!-- MODAL: NOME UTENTE -->
+<div class="modal-overlay" id="modal-username" onclick="closeModalOutside(event,'modal-username')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">👤 Il tuo nome</div>
+    <div class="form-group">
+      <label class="form-label">Come ti chiami?</label>
+      <input class="form-input" id="username-input" placeholder="Es. Marco, Giulia..." type="text" maxlength="30"
+        onkeydown="if(event.key==='Enter') saveUsername()">
+    </div>
+    <p style="font-size:13px;color:var(--text2);margin-bottom:16px">Il saluto in home verrà personalizzato con il tuo nome.</p>
+    <button class="btn-primary" onclick="saveUsername()">Salva</button>
+  </div>
+</div>
+
+</body>
+</html>
