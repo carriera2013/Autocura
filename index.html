@@ -413,7 +413,8 @@
           ${c.photo ? `<img src="${c.photo}" alt="${c.name}">` : '<div class="car-photo-placeholder">🚗</div>'}
           <div class="car-photo-gradient"></div>
           <div class="car-urgency-dot" style="background:${dotColor}"></div>
-          <button class="photo-upload-btn" onclick="event.stopPropagation();updateCardPhoto(${i})">📷</button>
+          <button class="photo-upload-btn" onclick="event.stopPropagation();updateCardPhoto(${i})" style="right:44px">📷</button>
+          <button class="photo-upload-btn" onclick="event.stopPropagation();openEditCar(${i})" style="right:8px">✏️</button>
         </div>
         <div class="car-info">
           <div class="car-name">${c.name}</div>
@@ -616,6 +617,93 @@
     showToast('Intervento eliminato');
   }
 
+  let editingCarIdx = null;
+  let editingCarPhoto = null; // null = unchanged, string = new photo, 'remove' = removed
+
+  function openEditCar(idx) {
+    editingCarIdx = idx;
+    editingCarPhoto = null;
+    const c = cars[idx];
+
+    // Photo picker preview
+    const picker = document.getElementById('edit-photo-picker');
+    picker.classList.remove('has-photo');
+    const oldImg = picker.querySelector('img'); if (oldImg) oldImg.remove();
+    const oldBtn = picker.querySelector('.photo-overlay-btn'); if (oldBtn) oldBtn.remove();
+    if (c.photo) {
+      picker.classList.add('has-photo');
+      const img = document.createElement('img'); img.src = c.photo; picker.prepend(img);
+      const btn = document.createElement('button');
+      btn.className = 'photo-overlay-btn'; btn.textContent = '✏️ Cambia';
+      btn.onclick = ev => { ev.stopPropagation(); document.getElementById('file-edit-car-photo').click(); };
+      picker.appendChild(btn);
+    }
+
+    document.getElementById('edit-car-name').value = c.name;
+    document.getElementById('edit-car-plate').value = c.plate || '';
+    document.getElementById('edit-car-year').value = c.year || '';
+    document.getElementById('edit-car-km').value = c.km || '';
+    document.getElementById('edit-car-revision').value = c.revision || '';
+    document.getElementById('edit-car-insurance').value = c.insurance || '';
+    document.getElementById('modal-edit-car').classList.add('open');
+  }
+
+  function handleEditCarPhoto(e) {
+    const file = e.target.files[0]; if (!file) return;
+    compressImage(file, base64 => {
+      editingCarPhoto = base64;
+      const picker = document.getElementById('edit-photo-picker');
+      picker.classList.add('has-photo');
+      let img = picker.querySelector('img');
+      if (!img) { img = document.createElement('img'); picker.prepend(img); }
+      img.src = base64;
+      let btn = picker.querySelector('.photo-overlay-btn');
+      if (!btn) {
+        btn = document.createElement('button');
+        btn.className = 'photo-overlay-btn'; btn.textContent = '✏️ Cambia';
+        btn.onclick = ev => { ev.stopPropagation(); document.getElementById('file-edit-car-photo').click(); };
+        picker.appendChild(btn);
+      }
+    });
+    e.target.value = '';
+  }
+
+  function saveEditCar() {
+    if (editingCarIdx === null) return;
+    const name = document.getElementById('edit-car-name').value.trim();
+    if (!name) { alert('Inserisci il nome del veicolo'); return; }
+    const c = cars[editingCarIdx];
+    c.name = name;
+    c.plate = document.getElementById('edit-car-plate').value.toUpperCase().trim();
+    c.year = document.getElementById('edit-car-year').value;
+    c.km = parseInt(document.getElementById('edit-car-km').value) || 0;
+    c.revision = document.getElementById('edit-car-revision').value;
+    c.insurance = document.getElementById('edit-car-insurance').value;
+    if (editingCarPhoto) c.photo = editingCarPhoto;
+    save();
+    closeModal('modal-edit-car');
+    editingCarIdx = null; editingCarPhoto = null;
+    render();
+    showToast('Veicolo aggiornato!');
+  }
+
+  function deleteCar() {
+    if (editingCarIdx === null) return;
+    const name = cars[editingCarIdx].name;
+    if (!confirm(`Eliminare "${name}" e tutti i suoi interventi?`)) return;
+    // Remove events for this car and remap indices
+    events = events.filter(e => e.carIdx !== editingCarIdx);
+    // Fix carIdx for events of other cars
+    events.forEach(e => { if (e.carIdx > editingCarIdx) e.carIdx--; });
+    cars.splice(editingCarIdx, 1);
+    save();
+    closeModal('modal-edit-car');
+    editingCarIdx = null;
+    render();
+    renderHistoryFull();
+    showToast(`"${name}" eliminata`);
+  }
+
   function render() { renderCars(); renderAlerts(); renderHistoryHome(); updateStats(); updateGreeting(); }
   render();
 </script>
@@ -674,6 +762,32 @@
     </div>
     <p style="font-size:13px;color:var(--text2);margin-bottom:16px">Il saluto in home verrà personalizzato con il tuo nome.</p>
     <button class="btn-primary" onclick="saveUsername()">Salva</button>
+  </div>
+</div>
+
+
+<!-- MODAL: MODIFICA AUTO -->
+<div class="modal-overlay" id="modal-edit-car" onclick="closeModalOutside(event,'modal-edit-car')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">✏️ Modifica Veicolo</div>
+    <div class="photo-picker" id="edit-photo-picker" onclick="document.getElementById('file-edit-car-photo').click()">
+      <div class="photo-picker-icon">📷</div>
+      <div class="photo-picker-label">Tocca per cambiare la foto</div>
+    </div>
+    <input type="file" id="file-edit-car-photo" accept="image/*" onchange="handleEditCarPhoto(event)">
+    <div class="form-group"><label class="form-label">Marca e Modello</label><input class="form-input" id="edit-car-name" placeholder="Es. Fiat 500, BMW Serie 3..." type="text"></div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Targa</label><input class="form-input" id="edit-car-plate" placeholder="AB 123 CD" type="text" style="text-transform:uppercase"></div>
+      <div class="form-group"><label class="form-label">Anno</label><input class="form-input" id="edit-car-year" placeholder="2020" type="number"></div>
+    </div>
+    <div class="form-group"><label class="form-label">Chilometraggio attuale</label><input class="form-input" id="edit-car-km" placeholder="Es. 45000" type="number"></div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Scad. Revisione</label><input class="form-input" id="edit-car-revision" type="date"></div>
+      <div class="form-group"><label class="form-label">Scad. Assicurazione</label><input class="form-input" id="edit-car-insurance" type="date"></div>
+    </div>
+    <button class="btn-primary" onclick="saveEditCar()">Salva Modifiche</button>
+    <button class="btn-danger" onclick="deleteCar()">🗑️ Elimina Veicolo</button>
   </div>
 </div>
 
