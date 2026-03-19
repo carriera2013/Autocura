@@ -6,227 +6,332 @@
 <title>AutoCura</title>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg: #0a0a0f; --surface: #14141e; --surface2: #1c1c2e; --surface3: #242438;
-    --accent: #4f8ef7; --accent2: #7c5cfc; --green: #34c759; --orange: #ff9500; --red: #ff3b30;
-    --text: #f0f0f8; --text2: #9090b0; --text3: #606080;
-    --border: rgba(255,255,255,0.07); --radius: 18px; --radius-sm: 12px;
-  }
-  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-  body { font-family:'Outfit',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; max-width:430px; margin:0 auto; overflow-x:hidden; padding-bottom:90px; }
-  body::before { content:''; position:fixed; top:-200px; left:-100px; width:500px; height:500px; background:radial-gradient(circle,rgba(79,142,247,0.1) 0%,transparent 70%); pointer-events:none; z-index:0; }
-  .header { padding:56px 24px 16px; position:relative; z-index:1; }
-  .header-top { display:flex; justify-content:space-between; align-items:flex-start; }
-  .greeting { font-size:14px; color:var(--text2); }
-  .title { font-size:28px; font-weight:700; letter-spacing:-0.5px; }
-  .title span { background:linear-gradient(135deg,#4f8ef7,#7c5cfc); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
-  .add-btn { width:40px; height:40px; background:linear-gradient(135deg,var(--accent),var(--accent2)); border:none; border-radius:50%; color:white; font-size:22px; cursor:pointer; display:flex; align-items:center; justify-content:center; box-shadow:0 4px 20px rgba(79,142,247,0.4); transition:transform 0.15s; flex-shrink:0; }
-  .add-btn:active { transform:scale(0.9); }
-  .search-bar { margin:0 24px 20px; background:var(--surface2); border-radius:var(--radius-sm); border:1px solid var(--border); display:flex; align-items:center; gap:10px; padding:12px 16px; }
-  .search-bar input { background:none; border:none; color:var(--text); font-family:inherit; font-size:15px; flex:1; outline:none; }
-  .search-bar input::placeholder { color:var(--text3); }
-  .stats-row { display:flex; gap:12px; padding:0 24px; margin-bottom:24px; }
-  .stat-card { flex:1; background:var(--surface2); border:1px solid var(--border); border-radius:var(--radius-sm); padding:14px; text-align:center; }
-  .stat-value { font-size:22px; font-weight:700; margin-bottom:2px; }
-  .stat-label { font-size:11px; color:var(--text2); font-weight:500; }
-  .section { margin-bottom:28px; position:relative; z-index:1; }
-  .section-header { display:flex; justify-content:space-between; align-items:center; padding:0 24px; margin-bottom:14px; }
-  .section-title { font-size:18px; font-weight:600; }
-  .see-all { font-size:13px; color:var(--accent); font-weight:500; cursor:pointer; }
-  .cars-scroll { display:flex; gap:14px; padding:0 24px; overflow-x:auto; scrollbar-width:none; }
-  .cars-scroll::-webkit-scrollbar { display:none; }
-  .car-card { min-width:200px; width:200px; background:var(--surface2); border-radius:var(--radius); border:1px solid var(--border); cursor:pointer; transition:transform 0.2s; position:relative; overflow:hidden; flex-shrink:0; }
-  .car-card:active { transform:scale(0.97); }
-  .car-card.selected { border-color:rgba(79,142,247,0.6); }
-  .car-photo-wrap { width:100%; height:120px; background:var(--surface3); position:relative; overflow:hidden; display:flex; align-items:center; justify-content:center; }
-  .car-photo-wrap img { width:100%; height:100%; object-fit:cover; display:block; }
-  .car-photo-placeholder { font-size:48px; opacity:0.35; }
-  .car-photo-gradient { position:absolute; bottom:0; left:0; right:0; height:50px; background:linear-gradient(transparent,var(--surface2)); }
-  .car-urgency-dot { position:absolute; top:8px; right:8px; width:10px; height:10px; border-radius:50%; border:2px solid var(--surface2); }
-  .car-info { padding:12px 14px 14px; }
-  .car-name { font-size:15px; font-weight:600; margin-bottom:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-  .car-plate { font-size:10px; color:var(--text2); font-weight:600; background:var(--surface3); border-radius:5px; padding:2px 7px; display:inline-block; letter-spacing:1px; margin-bottom:8px; }
-  .car-km { font-size:12px; color:var(--text2); }
-  .car-km strong { color:var(--text); }
-  .photo-upload-btn { position:absolute; bottom:8px; right:8px; width:28px; height:28px; border-radius:50%; background:rgba(0,0,0,0.6); border:1px solid rgba(255,255,255,0.2); color:white; font-size:13px; cursor:pointer; display:flex; align-items:center; justify-content:center; z-index:10; backdrop-filter:blur(4px); }
-  .alerts-list { padding:0 24px; display:flex; flex-direction:column; gap:10px; }
-  .alert-item { background:var(--surface2); border-radius:var(--radius-sm); border:1px solid var(--border); padding:14px 16px; display:flex; align-items:center; gap:14px; }
-  .alert-icon { width:40px; height:40px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0; }
-  .alert-icon.red { background:rgba(255,59,48,0.15); }
-  .alert-icon.orange { background:rgba(255,149,0,0.15); }
-  .alert-icon.green { background:rgba(52,199,89,0.15); }
-  .alert-info { flex:1; }
-  .alert-title { font-size:14px; font-weight:600; margin-bottom:2px; }
-  .alert-sub { font-size:12px; color:var(--text2); }
-  .alert-badge { font-size:11px; font-weight:600; padding:3px 8px; border-radius:20px; white-space:nowrap; }
-  .badge-red { background:rgba(255,59,48,0.2); color:var(--red); }
-  .badge-orange { background:rgba(255,149,0,0.2); color:var(--orange); }
-  .badge-green { background:rgba(52,199,89,0.2); color:var(--green); }
-  .history-list { padding:0 24px; display:flex; flex-direction:column; gap:10px; }
-  .history-item { background:var(--surface2); border-radius:var(--radius-sm); border:1px solid var(--border); padding:14px 16px; display:flex; align-items:flex-start; gap:12px; }
-  .history-thumb { width:38px; height:38px; border-radius:10px; background:var(--surface3); overflow:hidden; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:16px; }
-  .history-thumb img { width:100%; height:100%; object-fit:cover; }
-  .history-info { flex:1; min-width:0; }
-  .history-title { font-size:14px; font-weight:500; margin-bottom:2px; }
-  .history-meta { font-size:12px; color:var(--text2); }
-  .history-cost { font-size:14px; font-weight:600; color:var(--accent); white-space:nowrap; }
-  .history-actions { display:flex; gap:6px; flex-shrink:0; margin-left:2px; }
-  .btn-icon { width:32px; height:32px; border-radius:9px; border:none; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:14px; transition:transform 0.15s; }
-  .btn-icon:active { transform:scale(0.9); }
-  .btn-edit { background:rgba(79,142,247,0.15); }
-  .btn-delete { background:rgba(255,59,48,0.12); }
-  .btn-danger { width:100%; padding:14px; background:rgba(255,59,48,0.12); border:1px solid rgba(255,59,48,0.2); border-radius:var(--radius-sm); color:var(--red); font-family:inherit; font-size:15px; font-weight:600; cursor:pointer; margin-top:6px; }
-  .btn-danger:active { background:rgba(255,59,48,0.22); }
-  .detail-photo { width:100%; height:180px; border-radius:var(--radius); overflow:hidden; margin-bottom:20px; background:var(--surface3); display:flex; align-items:center; justify-content:center; font-size:56px; }
-  .detail-photo img { width:100%; height:100%; object-fit:cover; }
-  .detail-badge { display:inline-flex; align-items:center; gap:6px; background:var(--surface3); border-radius:20px; padding:6px 14px; font-size:13px; font-weight:600; margin-bottom:20px; }
-  .detail-row { display:flex; justify-content:space-between; align-items:flex-start; padding:14px 0; border-bottom:1px solid var(--border); }
-  .detail-row:last-child { border-bottom:none; }
-  .detail-label { font-size:12px; color:var(--text2); font-weight:600; text-transform:uppercase; letter-spacing:0.4px; }
-  .detail-value { font-size:15px; font-weight:500; text-align:right; max-width:60%; }
-  .detail-note-box { background:var(--surface2); border-radius:var(--radius); border:1px solid rgba(79,142,247,0.2); padding:18px 18px; margin-top:8px; font-size:15px; line-height:1.8; color:var(--text); white-space:pre-wrap; word-break:break-word; min-height:100px; letter-spacing:0.1px; }
-  .detail-actions { display:flex; gap:10px; margin-top:20px; }
-  .detail-actions .btn-primary { margin-top:0; }
-  .btn-secondary { flex:1; padding:14px; background:var(--surface2); border:1px solid var(--border); border-radius:var(--radius-sm); color:var(--text); font-family:inherit; font-size:15px; font-weight:600; cursor:pointer; transition:background 0.15s; }
-  .btn-secondary:active { background:var(--surface3); }
-  .bottom-nav { position:fixed; bottom:0; left:50%; transform:translateX(-50%); width:100%; max-width:430px; background:rgba(20,20,30,0.9); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px); border-top:1px solid var(--border); display:flex; align-items:center; justify-content:space-around; padding:12px 0 28px; z-index:100; }
-  .nav-item { display:flex; flex-direction:column; align-items:center; gap:4px; cursor:pointer; padding:4px 16px; }
-  .nav-icon { font-size:22px; }
-  .nav-label { font-size:10px; font-weight:500; color:var(--text3); }
-  .nav-item.active .nav-label { color:var(--accent); }
-  .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.75); backdrop-filter:blur(8px); z-index:200; display:flex; align-items:flex-end; opacity:0; pointer-events:none; transition:opacity 0.3s; }
-  .modal-overlay.open { opacity:1; pointer-events:all; }
-  .modal { background:var(--surface); border-radius:24px 24px 0 0; width:100%; max-width:430px; margin:0 auto; padding:20px 24px 44px; transform:translateY(100%); transition:transform 0.35s cubic-bezier(0.32,0.72,0,1); max-height:88vh; overflow-y:auto; }
-  .modal-overlay.open .modal { transform:translateY(0); }
-  .modal-handle { width:36px; height:4px; background:var(--surface3); border-radius:2px; margin:0 auto 20px; }
-  .modal-title { font-size:20px; font-weight:700; margin-bottom:20px; }
-  .photo-picker { width:100%; height:160px; background:var(--surface2); border-radius:var(--radius); border:2px dashed var(--surface3); display:flex; flex-direction:column; align-items:center; justify-content:center; cursor:pointer; margin-bottom:16px; position:relative; overflow:hidden; transition:border-color 0.2s; }
-  .photo-picker:active { border-color:var(--accent); }
-  .photo-picker img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
-  .photo-picker-label { font-size:13px; color:var(--text2); margin-top:8px; pointer-events:none; position:relative; z-index:1; }
-  .photo-picker-icon { font-size:32px; pointer-events:none; position:relative; z-index:1; }
-  .photo-picker.has-photo .photo-picker-icon, .photo-picker.has-photo .photo-picker-label { display:none; }
-  .photo-overlay-btn { position:absolute; bottom:10px; right:10px; z-index:2; background:rgba(0,0,0,0.6); border:none; color:white; border-radius:20px; padding:6px 12px; font-size:12px; font-weight:600; cursor:pointer; }
-  .form-group { margin-bottom:14px; }
-  .form-label { font-size:11px; color:var(--text2); font-weight:600; margin-bottom:6px; display:block; text-transform:uppercase; letter-spacing:0.5px; }
-  .form-input { width:100%; background:var(--surface2); border:1px solid var(--border); border-radius:var(--radius-sm); color:var(--text); font-family:inherit; font-size:15px; padding:12px 14px; outline:none; transition:border-color 0.2s; }
-  .form-input:focus { border-color:var(--accent); }
-  .form-select { width:100%; background:var(--surface2); border:1px solid var(--border); border-radius:var(--radius-sm); color:var(--text); font-family:inherit; font-size:15px; padding:12px 14px; outline:none; appearance:none; }
-  .form-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
-  .btn-primary { width:100%; padding:15px; background:linear-gradient(135deg,var(--accent),var(--accent2)); border:none; border-radius:var(--radius-sm); color:white; font-family:inherit; font-size:16px; font-weight:600; cursor:pointer; margin-top:8px; box-shadow:0 4px 20px rgba(79,142,247,0.3); transition:transform 0.15s; }
-  .btn-primary:active { transform:scale(0.98); }
-  .page { display:none; }
-  .page.active { display:block; }
-  .empty-state { text-align:center; padding:40px 24px; color:var(--text3); }
-  .empty-state .emoji { font-size:44px; margin-bottom:12px; }
-  .empty-state p { font-size:15px; }
-  .progress-bar { background:var(--surface3); border-radius:4px; height:4px; overflow:hidden; margin-top:6px; }
-  .progress-fill { height:100%; border-radius:4px; }
-  .print-btn { width:40px; height:40px; background:var(--surface2); border:1px solid var(--border); border-radius:50%; color:var(--text); font-size:18px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:transform 0.15s,background 0.15s; flex-shrink:0; }
-  .print-btn:active { transform:scale(0.9); background:var(--surface3); }
-  @media print {
-    body { background:#fff !important; color:#111 !important; max-width:100% !important; padding:0 !important; }
-    .bottom-nav, .add-btn, .print-btn, .history-actions, .search-bar, .stats-row, .header .greeting { display:none !important; }
-    .page { display:none !important; }
-    #print-area { display:block !important; }
-    .header { padding:20px 20px 10px !important; }
-    .title { font-size:22px !important; color:#111 !important; }
-    .title span { -webkit-text-fill-color:#333 !important; background:none !important; color:#333 !important; }
-    #print-area table { width:100%; border-collapse:collapse; font-family:Arial,sans-serif; font-size:12px; }
-    #print-area th { background:#f0f0f0; border:1px solid #ccc; padding:8px 10px; text-align:left; font-weight:700; color:#333; }
-    #print-area td { border:1px solid #ddd; padding:7px 10px; color:#222; vertical-align:top; }
-    #print-area tr:nth-child(even) td { background:#fafafa; }
-    #print-area .print-title { font-size:20px; font-weight:700; margin-bottom:4px; color:#111; }
-    #print-area .print-meta { font-size:12px; color:#666; margin-bottom:16px; }
-    #print-area .print-total { font-size:14px; font-weight:700; margin-top:14px; text-align:right; color:#333; }
-    #print-area .print-car-section { margin-bottom:24px; page-break-inside:avoid; }
-    #print-area .print-car-title { font-size:15px; font-weight:700; margin-bottom:8px; border-bottom:2px solid #333; padding-bottom:4px; }
-  }
-  #print-area { display:none; }
-  .toast { position:fixed; top:60px; left:50%; transform:translateX(-50%) translateY(-80px); background:var(--green); color:white; padding:10px 20px; border-radius:20px; font-size:14px; font-weight:600; z-index:300; transition:transform 0.3s; white-space:nowrap; }
-  .toast.show { transform:translateX(-50%) translateY(0); }
-  @keyframes fadeUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
-  .section { animation:fadeUp 0.35s ease both; }
-  .section:nth-child(3){animation-delay:0.05s} .section:nth-child(4){animation-delay:0.1s} .section:nth-child(5){animation-delay:0.15s}
-  input[type="file"] { display:none; }
+:root {
+  --bg:#0a0a0f; --surface:#14141e; --surface2:#1c1c2e; --surface3:#242438;
+  --accent:#4f8ef7; --accent2:#7c5cfc; --green:#34c759; --orange:#ff9500; --red:#ff3b30; --yellow:#ffd60a;
+  --text:#f0f0f8; --text2:#9090b0; --text3:#606080;
+  --border:rgba(255,255,255,0.07); --radius:18px; --radius-sm:12px;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;max-width:430px;margin:0 auto;overflow-x:hidden;padding-bottom:90px;}
+body::before{content:'';position:fixed;top:-200px;left:-100px;width:500px;height:500px;background:radial-gradient(circle,rgba(79,142,247,0.1) 0%,transparent 70%);pointer-events:none;z-index:0;}
+/* HEADER */
+.header{padding:52px 24px 14px;position:relative;z-index:1;}
+.header-top{display:flex;justify-content:space-between;align-items:flex-start;}
+.greeting{font-size:14px;color:var(--text2);cursor:pointer;}
+.title{font-size:26px;font-weight:700;letter-spacing:-0.5px;}
+.title span{background:linear-gradient(135deg,#4f8ef7,#7c5cfc);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.header-btns{display:flex;gap:10px;align-items:center;}
+.add-btn{width:40px;height:40px;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;border-radius:50%;color:white;font-size:22px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(79,142,247,0.4);transition:transform 0.15s;flex-shrink:0;}
+.add-btn:active{transform:scale(0.9);}
+.icon-btn{width:40px;height:40px;background:var(--surface2);border:1px solid var(--border);border-radius:50%;color:var(--text);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform 0.15s;flex-shrink:0;}
+.icon-btn:active{transform:scale(0.9);}
+/* SEARCH */
+.search-bar{margin:0 24px 18px;background:var(--surface2);border-radius:var(--radius-sm);border:1px solid var(--border);display:flex;align-items:center;gap:10px;padding:12px 16px;}
+.search-bar input{background:none;border:none;color:var(--text);font-family:inherit;font-size:15px;flex:1;outline:none;}
+.search-bar input::placeholder{color:var(--text3);}
+/* HOME QUICK STATS */
+.quick-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;padding:0 24px;margin-bottom:22px;}
+.qs-card{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px 12px;text-align:center;position:relative;overflow:hidden;}
+.qs-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(79,142,247,0.04),transparent);pointer-events:none;}
+.qs-val{font-size:20px;font-weight:700;margin-bottom:2px;}
+.qs-lbl{font-size:10px;color:var(--text2);font-weight:500;text-transform:uppercase;letter-spacing:0.3px;}
+/* SECTION */
+.section{margin-bottom:26px;position:relative;z-index:1;}
+.section-header{display:flex;justify-content:space-between;align-items:center;padding:0 24px;margin-bottom:12px;}
+.section-title{font-size:17px;font-weight:600;}
+.see-all{font-size:13px;color:var(--accent);font-weight:500;cursor:pointer;}
+/* CAR CARDS */
+.cars-scroll{display:flex;gap:14px;padding:0 24px;overflow-x:auto;scrollbar-width:none;}
+.cars-scroll::-webkit-scrollbar{display:none;}
+.car-card{min-width:190px;width:190px;background:var(--surface2);border-radius:var(--radius);border:1px solid var(--border);cursor:pointer;transition:transform 0.2s;position:relative;overflow:hidden;flex-shrink:0;}
+.car-card:active{transform:scale(0.97);}
+.car-card.selected{border-color:rgba(79,142,247,0.6);}
+.car-photo-wrap{width:100%;height:110px;background:var(--surface3);position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;}
+.car-photo-wrap img{width:100%;height:100%;object-fit:cover;display:block;}
+.car-photo-placeholder{font-size:44px;opacity:0.35;}
+.car-photo-gradient{position:absolute;bottom:0;left:0;right:0;height:50px;background:linear-gradient(transparent,var(--surface2));}
+.car-urgency-dot{position:absolute;top:8px;left:8px;width:10px;height:10px;border-radius:50%;border:2px solid var(--surface2);}
+.car-info{padding:10px 12px 12px;}
+.car-name{font-size:14px;font-weight:600;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.car-plate{font-size:10px;color:var(--text2);font-weight:600;background:var(--surface3);border-radius:5px;padding:2px 7px;display:inline-block;letter-spacing:1px;margin-bottom:6px;}
+.car-km{font-size:11px;color:var(--text2);}
+.car-km strong{color:var(--text);}
+.photo-upload-btn{position:absolute;bottom:8px;right:8px;width:26px;height:26px;border-radius:50%;background:rgba(0,0,0,0.65);border:1px solid rgba(255,255,255,0.2);color:white;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:10;backdrop-filter:blur(4px);}
+.car-edit-btn{position:absolute;bottom:8px;right:42px;width:26px;height:26px;border-radius:50%;background:rgba(0,0,0,0.65);border:1px solid rgba(255,255,255,0.2);color:white;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:10;backdrop-filter:blur(4px);}
+/* ALERT */
+.alerts-list{padding:0 24px;display:flex;flex-direction:column;gap:10px;}
+.alert-item{background:var(--surface2);border-radius:var(--radius-sm);border:1px solid var(--border);padding:13px 15px;display:flex;align-items:center;gap:13px;}
+.alert-icon{width:38px;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0;}
+.alert-icon.red{background:rgba(255,59,48,0.15);}
+.alert-icon.orange{background:rgba(255,149,0,0.15);}
+.alert-icon.green{background:rgba(52,199,89,0.15);}
+.alert-info{flex:1;}
+.alert-title{font-size:13px;font-weight:600;margin-bottom:2px;}
+.alert-sub{font-size:11px;color:var(--text2);}
+.alert-badge{font-size:11px;font-weight:600;padding:3px 8px;border-radius:20px;white-space:nowrap;}
+.badge-red{background:rgba(255,59,48,0.2);color:var(--red);}
+.badge-orange{background:rgba(255,149,0,0.2);color:var(--orange);}
+.badge-green{background:rgba(52,199,89,0.2);color:var(--green);}
+/* HISTORY */
+.history-list{padding:0 24px;display:flex;flex-direction:column;gap:10px;}
+.history-item{background:var(--surface2);border-radius:var(--radius-sm);border:1px solid var(--border);padding:13px 14px;display:flex;align-items:flex-start;gap:11px;cursor:pointer;}
+.history-item:active{background:var(--surface3);}
+.history-thumb{width:36px;height:36px;border-radius:9px;background:var(--surface3);overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:15px;margin-top:1px;}
+.history-thumb img{width:100%;height:100%;object-fit:cover;}
+.history-info{flex:1;min-width:0;}
+.history-title{font-size:14px;font-weight:500;margin-bottom:2px;}
+.history-meta{font-size:12px;color:var(--text2);}
+.history-cost{font-size:13px;font-weight:700;color:var(--accent);white-space:nowrap;}
+.history-actions{display:flex;gap:5px;flex-shrink:0;}
+.btn-icon{width:30px;height:30px;border-radius:8px;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;transition:transform 0.15s;}
+.btn-icon:active{transform:scale(0.9);}
+.btn-edit{background:rgba(79,142,247,0.15);}
+.btn-delete{background:rgba(255,59,48,0.12);}
+.note-inline{margin-top:8px;background:var(--surface3);border-radius:8px;padding:9px 12px;font-size:13px;line-height:1.6;color:var(--text);white-space:pre-wrap;word-break:break-word;border-left:3px solid var(--accent);}
+/* FUEL items */
+.fuel-item{background:var(--surface2);border-radius:var(--radius-sm);border:1px solid var(--border);padding:13px 14px;display:flex;align-items:center;gap:11px;}
+.fuel-icon{width:36px;height:36px;border-radius:9px;background:rgba(255,149,0,0.12);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.fuel-info{flex:1;}
+.fuel-title{font-size:14px;font-weight:500;margin-bottom:2px;}
+.fuel-meta{font-size:12px;color:var(--text2);}
+.fuel-cost{font-size:13px;font-weight:700;color:var(--orange);white-space:nowrap;}
+/* BOTTOM NAV */
+.bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:rgba(20,20,30,0.92);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-around;padding:10px 0 26px;z-index:100;}
+.nav-item{display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding:4px 12px;}
+.nav-icon{font-size:20px;}
+.nav-label{font-size:10px;font-weight:500;color:var(--text3);}
+.nav-item.active .nav-label{color:var(--accent);}
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.75);backdrop-filter:blur(8px);z-index:200;display:flex;align-items:flex-end;opacity:0;pointer-events:none;transition:opacity 0.3s;}
+.modal-overlay.open{opacity:1;pointer-events:all;}
+.modal{background:var(--surface);border-radius:24px 24px 0 0;width:100%;max-width:430px;margin:0 auto;padding:20px 24px 44px;transform:translateY(100%);transition:transform 0.35s cubic-bezier(0.32,0.72,0,1);max-height:88vh;overflow-y:auto;}
+.modal-overlay.open .modal{transform:translateY(0);}
+.modal-handle{width:36px;height:4px;background:var(--surface3);border-radius:2px;margin:0 auto 20px;}
+.modal-title{font-size:20px;font-weight:700;margin-bottom:20px;}
+.photo-picker{width:100%;height:150px;background:var(--surface2);border-radius:var(--radius);border:2px dashed var(--surface3);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;margin-bottom:16px;position:relative;overflow:hidden;transition:border-color 0.2s;}
+.photo-picker:active{border-color:var(--accent);}
+.photo-picker img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
+.photo-picker-label{font-size:13px;color:var(--text2);margin-top:8px;pointer-events:none;position:relative;z-index:1;}
+.photo-picker-icon{font-size:28px;pointer-events:none;position:relative;z-index:1;}
+.photo-picker.has-photo .photo-picker-icon,.photo-picker.has-photo .photo-picker-label{display:none;}
+.photo-overlay-btn{position:absolute;bottom:10px;right:10px;z-index:2;background:rgba(0,0,0,0.6);border:none;color:white;border-radius:20px;padding:5px 12px;font-size:12px;font-weight:600;cursor:pointer;}
+/* event photo picker */
+.event-photo-area{width:100%;height:100px;background:var(--surface2);border-radius:var(--radius-sm);border:1px dashed var(--surface3);display:flex;align-items:center;justify-content:center;gap:10px;cursor:pointer;margin-bottom:14px;position:relative;overflow:hidden;font-size:13px;color:var(--text2);}
+.event-photo-area img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
+.event-photo-area.has-photo .ep-label{display:none;}
+.ep-overlay-btn{position:absolute;bottom:8px;right:8px;z-index:2;background:rgba(0,0,0,0.6);border:none;color:white;border-radius:20px;padding:4px 10px;font-size:11px;font-weight:600;cursor:pointer;}
+.form-group{margin-bottom:14px;}
+.form-label{font-size:11px;color:var(--text2);font-weight:600;margin-bottom:6px;display:block;text-transform:uppercase;letter-spacing:0.5px;}
+.form-input{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:inherit;font-size:15px;padding:12px 14px;outline:none;transition:border-color 0.2s;}
+.form-input:focus{border-color:var(--accent);}
+.form-select{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:inherit;font-size:15px;padding:12px 14px;outline:none;appearance:none;}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.btn-primary{width:100%;padding:15px;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;border-radius:var(--radius-sm);color:white;font-family:inherit;font-size:16px;font-weight:600;cursor:pointer;margin-top:8px;box-shadow:0 4px 20px rgba(79,142,247,0.3);transition:transform 0.15s;}
+.btn-primary:active{transform:scale(0.98);}
+.btn-danger{width:100%;padding:14px;background:rgba(255,59,48,0.12);border:1px solid rgba(255,59,48,0.2);border-radius:var(--radius-sm);color:var(--red);font-family:inherit;font-size:15px;font-weight:600;cursor:pointer;margin-top:6px;}
+.btn-danger:active{background:rgba(255,59,48,0.22);}
+.btn-secondary{flex:1;padding:14px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:inherit;font-size:15px;font-weight:600;cursor:pointer;}
+.btn-secondary:active{background:var(--surface3);}
+/* DETAIL MODAL */
+.detail-photo{width:100%;height:170px;border-radius:var(--radius);overflow:hidden;margin-bottom:18px;background:var(--surface3);display:flex;align-items:center;justify-content:center;font-size:52px;}
+.detail-photo img{width:100%;height:100%;object-fit:cover;}
+.detail-badge{display:inline-flex;align-items:center;gap:6px;background:var(--surface3);border-radius:20px;padding:5px 13px;font-size:13px;font-weight:600;margin-bottom:16px;}
+.detail-row{display:flex;justify-content:space-between;align-items:flex-start;padding:12px 0;border-bottom:1px solid var(--border);}
+.detail-row:last-of-type{border-bottom:none;}
+.detail-label{font-size:12px;color:var(--text2);font-weight:600;text-transform:uppercase;letter-spacing:0.4px;}
+.detail-value{font-size:15px;font-weight:500;text-align:right;max-width:60%;}
+.detail-note-box{background:var(--surface2);border-radius:var(--radius);border:1px solid rgba(79,142,247,0.2);padding:16px;margin-top:8px;font-size:15px;line-height:1.8;color:var(--text);white-space:pre-wrap;word-break:break-word;min-height:90px;}
+.detail-actions{display:flex;gap:10px;margin-top:20px;}
+.detail-actions .btn-primary{margin-top:0;}
+/* STATS PAGE */
+.stats-section{padding:0 24px;margin-bottom:24px;}
+.stats-section-title{font-size:16px;font-weight:600;margin-bottom:12px;}
+.big-stat{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:14px;}
+.big-stat-val{font-size:38px;font-weight:700;color:var(--accent);}
+.big-stat-lbl{font-size:13px;color:var(--text2);margin-top:4px;}
+.progress-row{margin-bottom:14px;}
+.progress-bar{background:var(--surface3);border-radius:4px;height:5px;overflow:hidden;margin-top:5px;}
+.progress-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--accent),var(--accent2));}
+.stat-chip{display:flex;align-items:center;gap:12px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:10px;}
+.stat-chip-icon{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+/* PAGES */
+.page{display:none;}
+.page.active{display:block;}
+.empty-state{text-align:center;padding:36px 24px;color:var(--text3);}
+.empty-state .emoji{font-size:42px;margin-bottom:10px;}
+.empty-state p{font-size:14px;}
+/* TOAST */
+.toast{position:fixed;top:60px;left:50%;transform:translateX(-50%) translateY(-80px);background:var(--green);color:white;padding:10px 20px;border-radius:20px;font-size:14px;font-weight:600;z-index:300;transition:transform 0.3s;white-space:nowrap;}
+.toast.show{transform:translateX(-50%) translateY(0);}
+/* TAB SELECTOR */
+.tab-bar{display:flex;gap:8px;padding:0 24px;margin-bottom:16px;}
+.tab-btn{flex:1;padding:9px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;color:var(--text2);font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.15s;text-align:center;}
+.tab-btn.active{background:rgba(79,142,247,0.15);border-color:rgba(79,142,247,0.4);color:var(--accent);}
+/* PRINT */
+@media print {
+  body{background:#fff !important;color:#111 !important;max-width:100% !important;padding:0 !important;}
+  .bottom-nav,.add-btn,.icon-btn,.history-actions,.search-bar,.quick-stats,.header .greeting,.tab-bar,.btn-icon{display:none !important;}
+  .page{display:none !important;}
+  #print-area{display:block !important;}
+  #print-area table{width:100%;border-collapse:collapse;font-family:Arial,sans-serif;font-size:11px;}
+  #print-area th{background:#f0f0f0;border:1px solid #ccc;padding:7px 9px;text-align:left;font-weight:700;}
+  #print-area td{border:1px solid #ddd;padding:6px 9px;vertical-align:top;}
+  #print-area tr:nth-child(even) td{background:#fafafa;}
+  #print-area .print-car-section{margin-bottom:22px;page-break-inside:avoid;}
+  #print-area .print-car-title{font-size:14px;font-weight:700;margin-bottom:7px;border-bottom:2px solid #333;padding-bottom:3px;}
+  #print-area .print-total{font-size:13px;font-weight:700;text-align:right;margin-top:8px;}
+}
+#print-area{display:none;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.section{animation:fadeUp 0.3s ease both;}
+.section:nth-child(3){animation-delay:0.04s}.section:nth-child(4){animation-delay:0.08s}.section:nth-child(5){animation-delay:0.12s}
+input[type="file"]{display:none;}
+/* SCHEDULED */
+.sched-item{background:var(--surface2);border-radius:var(--radius-sm);border:1px solid var(--border);padding:13px 14px;display:flex;align-items:center;gap:12px;}
+.sched-icon{width:36px;height:36px;border-radius:9px;background:rgba(124,92,252,0.15);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+.sched-info{flex:1;}
+.sched-title{font-size:14px;font-weight:500;margin-bottom:2px;}
+.sched-meta{font-size:12px;color:var(--text2);}
+.sched-badge{font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;background:rgba(124,92,252,0.15);color:var(--accent2);white-space:nowrap;}
+.ricambi-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px;}
+.ricambi-item{display:flex;align-items:center;gap:8px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 12px;cursor:pointer;transition:border-color 0.15s,background 0.15s;user-select:none;}
+.ricambi-item.checked{border-color:rgba(79,142,247,0.5);background:rgba(79,142,247,0.08);}
+.ricambi-item input[type="checkbox"]{display:none;}
+.ricambi-check{width:18px;height:18px;border-radius:5px;border:2px solid var(--text3);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px;transition:all 0.15s;}
+.ricambi-item.checked .ricambi-check{background:var(--accent);border-color:var(--accent);color:white;}
+.ricambi-label{font-size:13px;font-weight:500;}
+.ricambi-section{display:none;margin-bottom:14px;}
+.ricambi-section.visible{display:block;}
+.tag-ricambio{display:inline-flex;align-items:center;gap:4px;background:rgba(79,142,247,0.12);border:1px solid rgba(79,142,247,0.25);color:var(--accent);border-radius:20px;padding:3px 10px;font-size:11px;font-weight:600;margin:2px;}
+.olio-toggle{display:flex;gap:8px;margin-bottom:12px;}
+.olio-btn{flex:1;padding:10px 8px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;color:var(--text2);font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;text-align:center;transition:all 0.15s;}
+.olio-btn.active{background:rgba(79,142,247,0.12);border-color:rgba(79,142,247,0.5);color:var(--accent);}
+.gomme-section{display:none;margin-bottom:14px;}
+.gomme-section.visible{display:block;}
+.olio-section{display:none;margin-bottom:14px;}
+.olio-section.visible{display:block;}
 </style>
 </head>
 <body>
 
 <div class="toast" id="toast"></div>
+<!-- Hidden file inputs -->
 <input type="file" id="file-car-photo" accept="image/*" onchange="handleCarPhotoModal(event)">
 <input type="file" id="file-card-photo" accept="image/*">
+<input type="file" id="file-edit-car-photo" accept="image/*" onchange="handleEditCarPhoto(event)">
+<input type="file" id="file-event-photo" accept="image/*" onchange="handleEventPhoto(event,'add')">
+<input type="file" id="file-edit-event-photo" accept="image/*" onchange="handleEventPhoto(event,'edit')">
 
-<!-- HOME -->
+<!-- PRINT AREA -->
+<div id="print-area"><div style="padding:20px 20px 10px"><div style="font-size:20px;font-weight:700">AutoCura — Storico Interventi</div><div id="print-meta" style="font-size:12px;color:#666;margin-top:4px"></div></div><div id="print-content" style="padding:0 20px 20px"></div></div>
+
+<!-- ═══════════════ HOME ═══════════════ -->
 <div class="page active" id="page-home">
   <div class="header">
     <div class="header-top">
-      <div><div class="greeting" id="main-greeting" onclick="openNameModal()" style="cursor:pointer" title="Tocca per modificare il nome">Bentornato 👋</div><div class="title">Le tue <span>Auto</span></div></div>
-      <button class="add-btn" onclick="openModal('modal-add-car')">+</button>
+      <div><div class="greeting" id="main-greeting" onclick="openModal('modal-username')">Bentornato 👋</div><div class="title">Le tue <span>Auto</span></div></div>
+      <div class="header-btns">
+        <button class="add-btn" onclick="openModal('modal-add-car')">+</button>
+      </div>
     </div>
   </div>
-  <div class="search-bar">
-    <span style="font-size:16px;color:var(--text3)">🔍</span>
-    <input type="text" placeholder="Cerca veicolo o intervento..." oninput="filterHistory(this.value)">
+  <div class="quick-stats">
+    <div class="qs-card"><div class="qs-val" id="qs-cars">0</div><div class="qs-lbl">Veicoli</div></div>
+    <div class="qs-card"><div class="qs-val" id="qs-alerts" style="color:var(--orange)">0</div><div class="qs-lbl">Scadenze</div></div>
+    <div class="qs-card"><div class="qs-val" id="qs-cost" style="color:var(--accent)">€0</div><div class="qs-lbl">Speso</div></div>
   </div>
-  <div class="stats-row">
-    <div class="stat-card"><div class="stat-value" id="stat-cars">0</div><div class="stat-label">Veicoli</div></div>
-    <div class="stat-card"><div class="stat-value" id="stat-alerts" style="color:var(--orange)">0</div><div class="stat-label">Scadenze</div></div>
-    <div class="stat-card"><div class="stat-value" id="stat-cost" style="color:var(--accent)">€0</div><div class="stat-label">Speso</div></div>
-  </div>
+  <!-- Cars -->
   <div class="section">
-    <div class="section-header"><div class="section-title">Veicoli</div><div class="see-all" onclick="openModal('modal-add-car')">+ Aggiungi</div></div>
+    <div class="section-header"><div class="section-title">🚗 Veicoli</div><div class="see-all" onclick="openModal('modal-add-car')">+ Aggiungi</div></div>
     <div class="cars-scroll" id="cars-container"></div>
   </div>
+  <!-- Alerts -->
   <div class="section">
     <div class="section-header"><div class="section-title">⚠️ Scadenze</div></div>
     <div class="alerts-list" id="alerts-container"></div>
   </div>
+  <!-- Scheduled -->
+  <div class="section" id="section-scheduled">
+    <div class="section-header"><div class="section-title">📅 Prossimi Interventi</div><div class="see-all" onclick="openModal('modal-add-scheduled')">+ Pianifica</div></div>
+    <div id="scheduled-container" style="padding:0 24px;display:flex;flex-direction:column;gap:10px"></div>
+  </div>
+  <!-- Recent history -->
   <div class="section">
-    <div class="section-header"><div class="section-title">Cronologia</div><div class="see-all" onclick="switchPage('page-history','nav-history')">Vedi tutto</div></div>
+    <div class="section-header"><div class="section-title">🔧 Ultimi Interventi</div><div class="see-all" onclick="switchPage('page-history','nav-history')">Vedi tutto</div></div>
     <div class="history-list" id="history-home"></div>
   </div>
 </div>
 
-<!-- HISTORY -->
+<!-- ═══════════════ HISTORY ═══════════════ -->
 <div class="page" id="page-history">
   <div class="header">
     <div class="header-top">
-      <div><div class="greeting">Tutti gli interventi</div><div class="title">📋 <span>Storico</span></div></div>
-      <div style="display:flex;gap:10px;align-items:center">
-        <button class="print-btn" onclick="printHistory()" title="Stampa storico">🖨️</button>
+      <div><div class="greeting">Cronologia completa</div><div class="title">📋 <span>Storico</span></div></div>
+      <div class="header-btns">
+        <button class="icon-btn" onclick="printHistory()" title="Stampa">🖨️</button>
         <button class="add-btn" onclick="openModal('modal-add-event')">+</button>
       </div>
     </div>
   </div>
-  <div class="history-list" id="history-full"></div>
+  <div class="search-bar"><span style="font-size:15px;color:var(--text3)">🔍</span><input type="text" placeholder="Cerca intervento..." oninput="filterHistory(this.value)"></div>
+  <div class="tab-bar">
+    <button class="tab-btn active" id="tab-all" onclick="switchHistTab('all')">Tutti</button>
+    <button class="tab-btn" id="tab-maint" onclick="switchHistTab('maint')">Manutenzione</button>
+    <button class="tab-btn" id="tab-fuel" onclick="switchHistTab('fuel')">⛽ Carburante</button>
+  </div>
+  <div id="history-full-wrap">
+    <div class="history-list" id="history-full"></div>
+    <div id="fuel-full" style="padding:0 24px;display:flex;flex-direction:column;gap:10px;display:none"></div>
+  </div>
 </div>
 
-<!-- STATS -->
+<!-- ═══════════════ STATS ═══════════════ -->
 <div class="page" id="page-stats">
   <div class="header">
     <div class="header-top">
-      <div><div class="greeting">Panoramica spese</div><div class="title">📊 <span>Statistiche</span></div></div>
+      <div><div class="greeting">Panoramica dettagliata</div><div class="title">📊 <span>Statistiche</span></div></div>
     </div>
   </div>
-  <div id="stats-content" style="padding:0 24px"></div>
+  <div id="stats-content"></div>
 </div>
 
+<!-- ═══════════════ SCHEDA VEICOLO ═══════════════ -->
+<div class="page" id="page-vehicle">
+  <div class="header">
+    <div class="header-top">
+      <div><div class="greeting" id="vehicle-page-sub">Seleziona un veicolo</div><div class="title">🚗 <span>Scheda</span></div></div>
+      <button class="icon-btn" onclick="switchPage('page-home','nav-home')">←</button>
+    </div>
+  </div>
+  <div id="vehicle-content" style="padding:0 24px"></div>
+</div>
+
+<!-- ═══════════════ BOTTOM NAV ═══════════════ -->
 <nav class="bottom-nav">
   <div class="nav-item active" id="nav-home" onclick="switchPage('page-home','nav-home')"><div class="nav-icon">🏠</div><div class="nav-label">Home</div></div>
   <div class="nav-item" id="nav-add" onclick="openModal('modal-add-event')"><div class="nav-icon">➕</div><div class="nav-label">Intervento</div></div>
+  <div class="nav-item" id="nav-fuel" onclick="openModal('modal-add-fuel')"><div class="nav-icon">⛽</div><div class="nav-label">Carburante</div></div>
   <div class="nav-item" id="nav-history" onclick="switchPage('page-history','nav-history')"><div class="nav-icon">📋</div><div class="nav-label">Storico</div></div>
   <div class="nav-item" id="nav-stats" onclick="switchPage('page-stats','nav-stats')"><div class="nav-icon">📊</div><div class="nav-label">Stats</div></div>
 </nav>
 
-<!-- MODAL ADD CAR -->
+<!-- ═══════ MODALS ═══════ -->
+
+<!-- USERNAME -->
+<div class="modal-overlay" id="modal-username" onclick="closeModalOutside(event,'modal-username')">
+  <div class="modal"><div class="modal-handle"></div><div class="modal-title">👤 Il tuo nome</div>
+    <div class="form-group"><label class="form-label">Come ti chiami?</label><input class="form-input" id="username-input" placeholder="Es. Marco, Giulia..." type="text" maxlength="30" onkeydown="if(event.key==='Enter')saveUsername()"></div>
+    <p style="font-size:13px;color:var(--text2);margin-bottom:16px">Il saluto in home verrà personalizzato con il tuo nome.</p>
+    <button class="btn-primary" onclick="saveUsername()">Salva</button>
+  </div>
+</div>
+
+<!-- ADD CAR -->
 <div class="modal-overlay" id="modal-add-car" onclick="closeModalOutside(event,'modal-add-car')">
-  <div class="modal">
-    <div class="modal-handle"></div>
-    <div class="modal-title">🚗 Aggiungi Veicolo</div>
+  <div class="modal"><div class="modal-handle"></div><div class="modal-title">🚗 Aggiungi Veicolo</div>
     <div class="photo-picker" id="photo-picker" onclick="document.getElementById('file-car-photo').click()">
-      <div class="photo-picker-icon">📷</div>
-      <div class="photo-picker-label">Tocca per aggiungere una foto</div>
+      <div class="photo-picker-icon">📷</div><div class="photo-picker-label">Tocca per aggiungere una foto</div>
     </div>
     <div class="form-group"><label class="form-label">Marca e Modello</label><input class="form-input" id="car-name" placeholder="Es. Fiat 500, BMW Serie 3..." type="text"></div>
     <div class="form-row">
@@ -242,613 +347,18 @@
   </div>
 </div>
 
-<!-- MODAL ADD EVENT -->
-<div class="modal-overlay" id="modal-add-event" onclick="closeModalOutside(event,'modal-add-event')">
-  <div class="modal">
-    <div class="modal-handle"></div>
-    <div class="modal-title">🔧 Nuovo Intervento</div>
-    <div class="form-group"><label class="form-label">Veicolo</label><select class="form-select" id="event-car"></select></div>
-    <div class="form-group"><label class="form-label">Tipo intervento</label>
-      <select class="form-select" id="event-type">
-        <option value="🛢️ Cambio olio">🛢️ Cambio olio</option>
-        <option value="🔋 Batteria">🔋 Batteria</option>
-        <option value="🦺 Gomme">🦺 Gomme</option>
-        <option value="🧊 Liquido freni">🧊 Liquido freni</option>
-        <option value="⚙️ Freni">⚙️ Freni</option>
-        <option value="💡 Lampadine">💡 Lampadine</option>
-        <option value="🔧 Meccanica generica">🔧 Meccanica generica</option>
-        <option value="🧴 Filtro aria">🧴 Filtro aria</option>
-        <option value="🏁 Revisione">🏁 Revisione</option>
-        <option value="🛡️ Assicurazione">🛡️ Assicurazione</option>
-        <option value="💊 Altro">💊 Altro</option>
-      </select>
-    </div>
-    <div class="form-group"><label class="form-label">Note (opzionale)</label><textarea class="form-input" id="event-note" placeholder="Descrivi l'intervento nel dettaglio..." rows="4" style="resize:none;line-height:1.6;min-height:100px"></textarea></div>
-    <div class="form-row">
-      <div class="form-group"><label class="form-label">Data</label><input class="form-input" id="event-date" type="date"></div>
-      <div class="form-group"><label class="form-label">Costo (€)</label><input class="form-input" id="event-cost" placeholder="0,00" type="number" step="0.01"></div>
-    </div>
-    <div class="form-group"><label class="form-label">Km al momento</label><input class="form-input" id="event-km" placeholder="Es. 50000" type="number"></div>
-    <button class="btn-primary" onclick="addEvent()">Salva Intervento</button>
-  </div>
-</div>
-
-<script>
-  let cars = JSON.parse(localStorage.getItem('autocura_cars') || '[]');
-  let events = JSON.parse(localStorage.getItem('autocura_events') || '[]');
-  let pendingPhoto = null;
-
-  function save() {
-    localStorage.setItem('autocura_cars', JSON.stringify(cars));
-    localStorage.setItem('autocura_events', JSON.stringify(events));
-  }
-
-  // USERNAME
-  let username = localStorage.getItem('autocura_username') || '';
-
-  function getGreeting() {
-    const h = new Date().getHours();
-    if (h >= 5 && h < 12) return 'Buongiorno';
-    if (h >= 12 && h < 18) return 'Buon pomeriggio';
-    return 'Buonasera';
-  }
-
-  function updateGreeting() {
-    const el = document.getElementById('main-greeting');
-    if (!el) return;
-    const saluto = getGreeting();
-    el.textContent = username ? `${saluto}, ${username}! 👋` : `${saluto} 👋`;
-  }
-
-  function openNameModal() {
-    document.getElementById('username-input').value = username;
-    document.getElementById('modal-username').classList.add('open');
-    setTimeout(() => document.getElementById('username-input').focus(), 350);
-  }
-
-  function saveUsername() {
-    const val = document.getElementById('username-input').value.trim();
-    username = val;
-    localStorage.setItem('autocura_username', username);
-    closeModal('modal-username');
-    updateGreeting();
-    showToast(username ? `Ciao, ${username}!` : 'Nome rimosso');
-  }
-
-  function switchPage(pageId, navId) {
-    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-    document.getElementById(pageId).classList.add('active');
-    if (navId) document.getElementById(navId).classList.add('active');
-    if (pageId === 'page-stats') renderStats();
-    if (pageId === 'page-history') renderHistoryFull();
-    window.scrollTo(0, 0);
-  }
-
-  function openModal(id) {
-    if (id === 'modal-add-event') populateCarSelect();
-    document.getElementById(id).classList.add('open');
-    document.querySelectorAll('#' + id + ' input[type="date"]').forEach(d => { if (!d.value) d.value = new Date().toISOString().split('T')[0]; });
-  }
-  function closeModal(id) { document.getElementById(id).classList.remove('open'); }
-  function closeModalOutside(e, id) { if (e.target.id === id) closeModal(id); }
-
-  function compressImage(file, callback) {
-    const reader = new FileReader();
-    reader.onload = ev => {
-      const img = new Image();
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        const MAX = 700;
-        let w = img.width, h = img.height;
-        if (w > h) { if (w > MAX) { h = h*MAX/w; w = MAX; } } else { if (h > MAX) { w = w*MAX/h; h = MAX; } }
-        canvas.width = w; canvas.height = h;
-        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-        callback(canvas.toDataURL('image/jpeg', 0.78));
-      };
-      img.src = ev.target.result;
-    };
-    reader.readAsDataURL(file);
-  }
-
-  function handleCarPhotoModal(e) {
-    const file = e.target.files[0]; if (!file) return;
-    compressImage(file, base64 => {
-      pendingPhoto = base64;
-      const picker = document.getElementById('photo-picker');
-      picker.classList.add('has-photo');
-      let img = picker.querySelector('img');
-      if (!img) { img = document.createElement('img'); picker.prepend(img); }
-      img.src = base64;
-      let btn = picker.querySelector('.photo-overlay-btn');
-      if (!btn) {
-        btn = document.createElement('button');
-        btn.className = 'photo-overlay-btn'; btn.textContent = '✏️ Cambia';
-        btn.onclick = ev => { ev.stopPropagation(); document.getElementById('file-car-photo').click(); };
-        picker.appendChild(btn);
-      }
-    });
-    e.target.value = '';
-  }
-
-  function updateCardPhoto(carIdx) {
-    const input = document.getElementById('file-card-photo');
-    input.onchange = e => {
-      const file = e.target.files[0]; if (!file) return;
-      compressImage(file, base64 => { cars[carIdx].photo = base64; save(); renderCars(); showToast('Foto aggiornata!'); });
-      input.value = '';
-    };
-    input.click();
-  }
-
-  function addCar() {
-    const name = document.getElementById('car-name').value.trim();
-    if (!name) { alert('Inserisci il nome del veicolo'); return; }
-    cars.push({ name, plate: document.getElementById('car-plate').value.toUpperCase().trim(), year: document.getElementById('car-year').value, km: parseInt(document.getElementById('car-km').value)||0, revision: document.getElementById('car-revision').value, insurance: document.getElementById('car-insurance').value, photo: pendingPhoto||null });
-    save(); closeModal('modal-add-car');
-    ['car-name','car-plate','car-year','car-km','car-revision','car-insurance'].forEach(id => document.getElementById(id).value = '');
-    const picker = document.getElementById('photo-picker');
-    picker.classList.remove('has-photo');
-    const img = picker.querySelector('img'); if (img) img.remove();
-    const btn = picker.querySelector('.photo-overlay-btn'); if (btn) btn.remove();
-    pendingPhoto = null;
-    render(); showToast('Veicolo aggiunto!');
-  }
-
-  function populateCarSelect() {
-    const sel = document.getElementById('event-car');
-    sel.innerHTML = cars.length ? cars.map((c,i) => `<option value="${i}">${c.name}${c.plate?' · '+c.plate:''}</option>`).join('') : '<option>Nessun veicolo</option>';
-  }
-
-  function addEvent() {
-    if (!cars.length) { alert('Prima aggiungi un veicolo'); return; }
-    const carIdx = parseInt(document.getElementById('event-car').value);
-    const ev = { carIdx, type: document.getElementById('event-type').value, note: document.getElementById('event-note').value, date: document.getElementById('event-date').value, cost: parseFloat(document.getElementById('event-cost').value)||0, km: parseInt(document.getElementById('event-km').value)||0 };
-    events.unshift(ev);
-    if (ev.km > cars[carIdx].km) cars[carIdx].km = ev.km;
-    save(); closeModal('modal-add-event');
-    ['event-note','event-cost','event-km'].forEach(id => document.getElementById(id).value = '');
-    render(); showToast('Intervento salvato!');
-  }
-
-  function renderCars() {
-    const container = document.getElementById('cars-container');
-    if (!cars.length) {
-      container.innerHTML = `<div class="car-card" style="cursor:pointer;opacity:0.5;min-width:160px" onclick="openModal('modal-add-car')"><div class="car-photo-wrap"><div class="car-photo-placeholder">➕</div></div><div class="car-info"><div class="car-name">Aggiungi Auto</div></div></div>`;
-      return;
-    }
-    container.innerHTML = cars.map((c,i) => {
-      const urg = getCarUrgency(c);
-      const dotColor = urg==='ok'?'var(--green)':urg==='warn'?'var(--orange)':'var(--red)';
-      return `<div class="car-card" onclick="selectCar(${i})">
-        <div class="car-photo-wrap">
-          ${c.photo ? `<img src="${c.photo}" alt="${c.name}">` : '<div class="car-photo-placeholder">🚗</div>'}
-          <div class="car-photo-gradient"></div>
-          <div class="car-urgency-dot" style="background:${dotColor}"></div>
-          <button class="photo-upload-btn" onclick="event.stopPropagation();updateCardPhoto(${i})" style="right:44px">📷</button>
-          <button class="photo-upload-btn" onclick="event.stopPropagation();openEditCar(${i})" style="right:8px">✏️</button>
-        </div>
-        <div class="car-info">
-          <div class="car-name">${c.name}</div>
-          ${c.plate?`<div class="car-plate">${c.plate}</div>`:''}
-          <div class="car-km">Km: <strong>${c.km.toLocaleString('it-IT')}</strong></div>
-        </div>
-      </div>`;
-    }).join('');
-  }
-
-  function getCarUrgency(car) {
-    const today = new Date();
-    const chk = ds => { if (!ds) return 'ok'; const diff=(new Date(ds)-today)/86400000; return diff<0?'critical':diff<30?'warn':'ok'; };
-    const r=chk(car.revision), ins=chk(car.insurance);
-    if (r==='critical'||ins==='critical') return 'critical';
-    if (r==='warn'||ins==='warn') return 'warn';
-    return 'ok';
-  }
-
-  function selectCar(i) { document.querySelectorAll('.car-card').forEach(c=>c.classList.remove('selected')); document.querySelectorAll('.car-card')[i]?.classList.add('selected'); }
-
-  function renderAlerts() {
-    const container = document.getElementById('alerts-container');
-    const today = new Date(); const list = [];
-    cars.forEach(c => {
-      const chk = (label, ds, icon) => {
-        if (!ds) return; const d=new Date(ds); const diff=Math.round((d-today)/86400000);
-        const level=diff<0?'red':diff<15?'red':diff<30?'orange':diff<60?'orange':null;
-        if (!level) return;
-        list.push({icon, label:`${c.name} — ${label}`, sub:diff<0?'Scaduta il '+d.toLocaleDateString('it-IT'):'Scade il '+d.toLocaleDateString('it-IT'), level, badge:diff<0?'Scaduta':`${diff}gg`});
-      };
-      chk('Revisione',c.revision,'🏁'); chk('Assicurazione',c.insurance,'📋');
-    });
-    document.getElementById('stat-alerts').textContent = list.length;
-    if (!list.length) { container.innerHTML=`<div class="alert-item"><div class="alert-icon green">✅</div><div class="alert-info"><div class="alert-title">Tutto in ordine</div><div class="alert-sub">Nessuna scadenza imminente</div></div></div>`; return; }
-    container.innerHTML = list.map(a=>`<div class="alert-item"><div class="alert-icon ${a.level}">${a.icon}</div><div class="alert-info"><div class="alert-title">${a.label}</div><div class="alert-sub">${a.sub}</div></div><div class="alert-badge badge-${a.level}">${a.badge}</div></div>`).join('');
-  }
-
-  function historyItem(e, idx) {
-    const car = cars[e.carIdx];
-    const thumb = car?.photo ? `<div class="history-thumb"><img src="${car.photo}"></div>` : `<div class="history-thumb">${e.type.split(' ')[0]}</div>`;
-    const carLabel = car ? `${car.name}${car.plate?' · '+car.plate:''}` : 'Veicolo rimosso';
-    const date = e.date ? new Date(e.date).toLocaleDateString('it-IT') : '—';
-    const costHtml = e.cost ? `<div class="history-cost">€${e.cost.toFixed(0)}</div>` : '';
-    const hasNote = e.note && e.note.trim().length > 0;
-    const noteHtml = hasNote
-      ? `<div style="margin-top:8px;background:var(--surface3);border-radius:8px;padding:9px 12px;font-size:13px;line-height:1.6;color:var(--text);white-space:pre-wrap;word-break:break-word;border-left:3px solid var(--accent)">${e.note.trim()}</div>`
-      : '';
-    return `<div class="history-item" onclick="openDetailEvent(${idx})" style="cursor:pointer">
-      <div style="flex-shrink:0;margin-top:1px">${thumb}</div>
-      <div class="history-info">
-        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
-          <div>
-            <div class="history-title">${e.type.split(' ').slice(1).join(' ')}</div>
-            <div class="history-meta">${carLabel} · ${date}${e.km?' · '+e.km.toLocaleString('it-IT')+' km':''}</div>
-          </div>
-          <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
-            ${costHtml}
-            <div class="history-actions" onclick="event.stopPropagation()">
-              <button class="btn-icon btn-edit" onclick="openEditEvent(${idx})" title="Modifica">✏️</button>
-              <button class="btn-icon btn-delete" onclick="confirmDeleteEvent(${idx})" title="Elimina">🗑️</button>
-            </div>
-          </div>
-        </div>
-        ${noteHtml}
-      </div>
-    </div>`;
-  }
-
-  function renderHistoryHome() {
-    const c = document.getElementById('history-home'); const r=events.slice(0,5);
-    c.innerHTML = r.length ? r.map((e,i)=>historyItem(e,i)).join('') : `<div class="empty-state"><div class="emoji">🔧</div><p>Nessun intervento registrato</p></div>`;
-  }
-
-  function renderHistoryFull(filter='') {
-    const c = document.getElementById('history-full');
-    const f = filter ? events.filter(e=>{ const car=cars[e.carIdx]; return (car&&car.name.toLowerCase().includes(filter))||e.type.toLowerCase().includes(filter); }) : events;
-    c.innerHTML = f.length ? f.map((e,i)=>historyItem(e,events.indexOf(e))).join('') : `<div class="empty-state"><div class="emoji">📭</div><p>Nessun risultato</p></div>`;
-  }
-
-  function filterHistory(val) { renderHistoryFull(val.toLowerCase()); }
-
-  function renderStats() {
-    const container = document.getElementById('stats-content');
-    if (!events.length) { container.innerHTML=`<div class="empty-state"><div class="emoji">📊</div><p>Aggiungi interventi per vedere le statistiche</p></div>`; return; }
-    const total = events.reduce((s,e)=>s+e.cost,0);
-    const byType={};
-    events.forEach(e=>{ const t=e.type.split(' ').slice(1).join(' '); byType[t]=(byType[t]||0)+e.cost; });
-    const sorted=Object.entries(byType).sort((a,b)=>b[1]-a[1]); const maxC=sorted[0]?.[1]||1;
-    const byCar={};
-    events.forEach(e=>{ const c=cars[e.carIdx]; if(!c) return; byCar[c.name]=(byCar[c.name]||0)+e.cost; });
-    const carPhotos = cars.filter(c=>c.photo).slice(0,5).map(c=>`<img src="${c.photo}" style="width:42px;height:42px;border-radius:50%;object-fit:cover;border:2px solid var(--surface);margin-right:-10px">`).join('');
-    container.innerHTML = `
-      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:20px">
-        ${carPhotos?`<div style="display:flex;margin-bottom:14px;padding-right:10px">${carPhotos}</div>`:''}
-        <div style="font-size:12px;color:var(--text2);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.5px">Totale speso</div>
-        <div style="font-size:40px;font-weight:700;color:var(--accent)">€${total.toFixed(0)}</div>
-        <div style="font-size:13px;color:var(--text2);margin-top:4px">${events.length} interventi · ${cars.length} veicoli</div>
-      </div>
-      <div style="font-size:16px;font-weight:600;margin-bottom:14px">Per tipo intervento</div>
-      ${sorted.map(([t,cost])=>`<div style="margin-bottom:16px"><div style="display:flex;justify-content:space-between;margin-bottom:5px"><span style="font-size:14px">${t}</span><span style="font-size:14px;font-weight:600;color:var(--accent)">€${cost.toFixed(0)}</span></div><div class="progress-bar"><div class="progress-fill" style="width:${(cost/maxC*100).toFixed(0)}%;background:linear-gradient(90deg,var(--accent),var(--accent2))"></div></div></div>`).join('')}
-      ${Object.keys(byCar).length>1?`<div style="font-size:16px;font-weight:600;margin:24px 0 14px">Per veicolo</div>${Object.entries(byCar).sort((a,b)=>b[1]-a[1]).map(([name,cost])=>{ const car=cars.find(c=>c.name===name); return `<div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;background:var(--surface2);padding:12px 14px;border-radius:var(--radius-sm);border:1px solid var(--border)">${car?.photo?`<img src="${car.photo}" style="width:36px;height:36px;border-radius:8px;object-fit:cover;flex-shrink:0">`:'<div style="width:36px;height:36px;background:var(--surface3);border-radius:8px;display:flex;align-items:center;justify-content:center">🚗</div>'}<span style="font-size:14px;flex:1">${name}</span><span style="font-size:14px;font-weight:600;color:var(--accent)">€${cost.toFixed(0)}</span></div>`; }).join('')}`:''}
-      <div style="height:20px"></div>`;
-  }
-
-  function updateStats() {
-    document.getElementById('stat-cars').textContent = cars.length;
-    const total = events.reduce((s,e)=>s+e.cost,0);
-    document.getElementById('stat-cost').textContent = '€'+(total>=1000?(total/1000).toFixed(1)+'k':total.toFixed(0));
-  }
-
-  function showToast(msg) {
-    const t=document.getElementById('toast'); t.textContent='✓ '+msg; t.classList.add('show');
-    setTimeout(()=>t.classList.remove('show'),2500);
-  }
-
-  function printHistory() {
-    const meta = document.getElementById('print-meta');
-    const content = document.getElementById('print-content');
-    const now = new Date().toLocaleDateString('it-IT', {day:'2-digit',month:'long',year:'numeric'});
-    meta.textContent = `Stampato il ${now} · ${events.length} interventi · ${cars.length} veicoli`;
-
-    // Group by car
-    const grouped = {};
-    cars.forEach((c,i) => { grouped[i] = []; });
-    events.forEach(e => {
-      if (grouped[e.carIdx] !== undefined) grouped[e.carIdx].push(e);
-    });
-
-    let html = '';
-    cars.forEach((car, carIdx) => {
-      const evs = grouped[carIdx];
-      if (!evs.length) return;
-      const carTotal = evs.reduce((s,e)=>s+e.cost,0);
-      html += `<div class="print-car-section">
-        <div class="print-car-title">🚗 ${car.name}${car.plate?' — '+car.plate:''}${car.year?' ('+car.year+')':''}</div>
-        <table>
-          <thead><tr><th>Data</th><th>Intervento</th><th>Note</th><th>Km</th><th>Costo</th></tr></thead>
-          <tbody>
-            ${evs.map(e=>`<tr>
-              <td>${e.date?new Date(e.date).toLocaleDateString('it-IT'):'—'}</td>
-              <td>${e.type.split(' ').slice(1).join(' ')}</td>
-              <td>${e.note||'—'}</td>
-              <td>${e.km?e.km.toLocaleString('it-IT')+' km':'—'}</td>
-              <td>${e.cost?'€'+e.cost.toFixed(2):'—'}</td>
-            </tr>`).join('')}
-          </tbody>
-        </table>
-        <div class="print-total">Totale: €${carTotal.toFixed(2)}</div>
-      </div>`;
-    });
-
-    const grandTotal = events.reduce((s,e)=>s+e.cost,0);
-    html += `<div style="text-align:right;font-size:15px;font-weight:700;margin-top:10px;padding-top:10px;border-top:2px solid #333">Totale generale: €${grandTotal.toFixed(2)}</div>`;
-
-    content.innerHTML = html;
-    window.print();
-  }
-
-  let editingEventIdx = null;
-
-  function openEditEvent(idx) {
-    editingEventIdx = idx;
-    const e = events[idx];
-    // populate car select
-    const sel = document.getElementById('edit-event-car');
-    sel.innerHTML = cars.map((c,i) => `<option value="${i}">${c.name}${c.plate?' · '+c.plate:''}</option>`).join('');
-    sel.value = e.carIdx;
-    // populate type
-    document.getElementById('edit-event-type').value = e.type;
-    document.getElementById('edit-event-note').value = e.note || '';
-    document.getElementById('edit-event-date').value = e.date || '';
-    document.getElementById('edit-event-cost').value = e.cost || '';
-    document.getElementById('edit-event-km').value = e.km || '';
-    document.getElementById('modal-edit-event').classList.add('open');
-  }
-
-  function saveEditEvent() {
-    if (editingEventIdx === null) return;
-    const carIdx = parseInt(document.getElementById('edit-event-car').value);
-    events[editingEventIdx] = {
-      carIdx,
-      type: document.getElementById('edit-event-type').value,
-      note: document.getElementById('edit-event-note').value,
-      date: document.getElementById('edit-event-date').value,
-      cost: parseFloat(document.getElementById('edit-event-cost').value)||0,
-      km: parseInt(document.getElementById('edit-event-km').value)||0,
-    };
-    save();
-    closeModal('modal-edit-event');
-    editingEventIdx = null;
-    render();
-    renderHistoryFull();
-    showToast('Intervento aggiornato!');
-  }
-
-  function confirmDeleteEvent(idx) {
-    if (!confirm('Eliminare questo intervento?')) return;
-    events.splice(idx, 1);
-    save();
-    render();
-    renderHistoryFull();
-    showToast('Intervento eliminato');
-  }
-
-  function deleteEvent() {
-    if (editingEventIdx === null) return;
-    if (!confirm('Eliminare questo intervento?')) return;
-    events.splice(editingEventIdx, 1);
-    save();
-    closeModal('modal-edit-event');
-    editingEventIdx = null;
-    render();
-    renderHistoryFull();
-    showToast('Intervento eliminato');
-  }
-
-  function openDetailEvent(idx) {
-    const e = events[idx];
-    const car = cars[e.carIdx];
-    const date = e.date ? new Date(e.date).toLocaleDateString('it-IT', {day:'2-digit', month:'long', year:'numeric'}) : '—';
-    const typeEmoji = e.type.split(' ')[0];
-    const typeLabel = e.type.split(' ').slice(1).join(' ');
-    const carPhoto = car?.photo;
-    const carName = car ? `${car.name}${car.plate ? ' · ' + car.plate : ''}` : 'Veicolo rimosso';
-
-    document.getElementById('detail-content').innerHTML = `
-      <div class="detail-photo">
-        ${carPhoto ? `<img src="${carPhoto}" alt="${car?.name}">` : typeEmoji}
-      </div>
-      <div class="detail-badge">${typeEmoji} <span>${typeLabel}</span></div>
-      <div style="font-size:20px;font-weight:700;margin-bottom:4px">${typeLabel}</div>
-      <div style="font-size:14px;color:var(--text2);margin-bottom:20px">${carName}</div>
-
-      <div class="detail-row">
-        <div class="detail-label">Data</div>
-        <div class="detail-value">${date}</div>
-      </div>
-      ${e.km ? `<div class="detail-row"><div class="detail-label">Chilometraggio</div><div class="detail-value">${e.km.toLocaleString('it-IT')} km</div></div>` : ''}
-      ${e.cost ? `<div class="detail-row"><div class="detail-label">Costo</div><div class="detail-value" style="color:var(--accent);font-size:18px;font-weight:700">€${e.cost.toFixed(2)}</div></div>` : ''}
-
-      <div style="margin-top:20px">
-          <div style="font-size:13px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;display:flex;align-items:center;gap:6px">📝 Note intervento</div>
-          ${e.note && e.note.trim()
-            ? `<div class="detail-note-box">${e.note.trim()}</div>`
-            : `<div class="detail-note-box" style="color:var(--text3);font-style:italic;min-height:60px">Nessuna nota aggiunta</div>`
-          }
-        </div>
-
-      <div class="detail-actions">
-        <button class="btn-secondary" onclick="closeModal('modal-detail-event')">Chiudi</button>
-        <button class="btn-primary" style="flex:1" onclick="closeModal('modal-detail-event');openEditEvent(${idx})">✏️ Modifica</button>
-      </div>
-    `;
-    document.getElementById('modal-detail-event').classList.add('open');
-  }
-
-  let editingCarIdx = null;
-  let editingCarPhoto = null; // null = unchanged, string = new photo, 'remove' = removed
-
-  function openEditCar(idx) {
-    editingCarIdx = idx;
-    editingCarPhoto = null;
-    const c = cars[idx];
-
-    // Photo picker preview
-    const picker = document.getElementById('edit-photo-picker');
-    picker.classList.remove('has-photo');
-    const oldImg = picker.querySelector('img'); if (oldImg) oldImg.remove();
-    const oldBtn = picker.querySelector('.photo-overlay-btn'); if (oldBtn) oldBtn.remove();
-    if (c.photo) {
-      picker.classList.add('has-photo');
-      const img = document.createElement('img'); img.src = c.photo; picker.prepend(img);
-      const btn = document.createElement('button');
-      btn.className = 'photo-overlay-btn'; btn.textContent = '✏️ Cambia';
-      btn.onclick = ev => { ev.stopPropagation(); document.getElementById('file-edit-car-photo').click(); };
-      picker.appendChild(btn);
-    }
-
-    document.getElementById('edit-car-name').value = c.name;
-    document.getElementById('edit-car-plate').value = c.plate || '';
-    document.getElementById('edit-car-year').value = c.year || '';
-    document.getElementById('edit-car-km').value = c.km || '';
-    document.getElementById('edit-car-revision').value = c.revision || '';
-    document.getElementById('edit-car-insurance').value = c.insurance || '';
-    document.getElementById('modal-edit-car').classList.add('open');
-  }
-
-  function handleEditCarPhoto(e) {
-    const file = e.target.files[0]; if (!file) return;
-    compressImage(file, base64 => {
-      editingCarPhoto = base64;
-      const picker = document.getElementById('edit-photo-picker');
-      picker.classList.add('has-photo');
-      let img = picker.querySelector('img');
-      if (!img) { img = document.createElement('img'); picker.prepend(img); }
-      img.src = base64;
-      let btn = picker.querySelector('.photo-overlay-btn');
-      if (!btn) {
-        btn = document.createElement('button');
-        btn.className = 'photo-overlay-btn'; btn.textContent = '✏️ Cambia';
-        btn.onclick = ev => { ev.stopPropagation(); document.getElementById('file-edit-car-photo').click(); };
-        picker.appendChild(btn);
-      }
-    });
-    e.target.value = '';
-  }
-
-  function saveEditCar() {
-    if (editingCarIdx === null) return;
-    const name = document.getElementById('edit-car-name').value.trim();
-    if (!name) { alert('Inserisci il nome del veicolo'); return; }
-    const c = cars[editingCarIdx];
-    c.name = name;
-    c.plate = document.getElementById('edit-car-plate').value.toUpperCase().trim();
-    c.year = document.getElementById('edit-car-year').value;
-    c.km = parseInt(document.getElementById('edit-car-km').value) || 0;
-    c.revision = document.getElementById('edit-car-revision').value;
-    c.insurance = document.getElementById('edit-car-insurance').value;
-    if (editingCarPhoto) c.photo = editingCarPhoto;
-    save();
-    closeModal('modal-edit-car');
-    editingCarIdx = null; editingCarPhoto = null;
-    render();
-    showToast('Veicolo aggiornato!');
-  }
-
-  function deleteCar() {
-    if (editingCarIdx === null) return;
-    const name = cars[editingCarIdx].name;
-    if (!confirm(`Eliminare "${name}" e tutti i suoi interventi?`)) return;
-    // Remove events for this car and remap indices
-    events = events.filter(e => e.carIdx !== editingCarIdx);
-    // Fix carIdx for events of other cars
-    events.forEach(e => { if (e.carIdx > editingCarIdx) e.carIdx--; });
-    cars.splice(editingCarIdx, 1);
-    save();
-    closeModal('modal-edit-car');
-    editingCarIdx = null;
-    render();
-    renderHistoryFull();
-    showToast(`"${name}" eliminata`);
-  }
-
-  function render() { renderCars(); renderAlerts(); renderHistoryHome(); updateStats(); updateGreeting(); }
-  render();
-</script>
-
-<!-- MODAL EDIT EVENT -->
-<div class="modal-overlay" id="modal-edit-event" onclick="closeModalOutside(event,'modal-edit-event')">
-  <div class="modal">
-    <div class="modal-handle"></div>
-    <div class="modal-title">✏️ Modifica Intervento</div>
-    <div class="form-group"><label class="form-label">Veicolo</label><select class="form-select" id="edit-event-car"></select></div>
-    <div class="form-group"><label class="form-label">Tipo intervento</label>
-      <select class="form-select" id="edit-event-type">
-        <option value="🛢️ Cambio olio">🛢️ Cambio olio</option>
-        <option value="🔋 Batteria">🔋 Batteria</option>
-        <option value="🦺 Gomme">🦺 Gomme</option>
-        <option value="🧊 Liquido freni">🧊 Liquido freni</option>
-        <option value="⚙️ Freni">⚙️ Freni</option>
-        <option value="💡 Lampadine">💡 Lampadine</option>
-        <option value="🔧 Meccanica generica">🔧 Meccanica generica</option>
-        <option value="🧴 Filtro aria">🧴 Filtro aria</option>
-        <option value="🏁 Revisione">🏁 Revisione</option>
-        <option value="🛡️ Assicurazione">🛡️ Assicurazione</option>
-        <option value="💊 Altro">💊 Altro</option>
-      </select>
-    </div>
-    <div class="form-group"><label class="form-label">Note (opzionale)</label><textarea class="form-input" id="edit-event-note" placeholder="Descrivi l'intervento nel dettaglio..." rows="4" style="resize:none;line-height:1.6;min-height:100px"></textarea></div>
-    <div class="form-row">
-      <div class="form-group"><label class="form-label">Data</label><input class="form-input" id="edit-event-date" type="date"></div>
-      <div class="form-group"><label class="form-label">Costo (€)</label><input class="form-input" id="edit-event-cost" placeholder="0,00" type="number" step="0.01"></div>
-    </div>
-    <div class="form-group"><label class="form-label">Km al momento</label><input class="form-input" id="edit-event-km" placeholder="Es. 50000" type="number"></div>
-    <button class="btn-primary" onclick="saveEditEvent()">Salva Modifiche</button>
-    <button class="btn-danger" onclick="deleteEvent()">🗑️ Elimina Intervento</button>
-  </div>
-</div>
-
-
-<div id="print-area">
-  <div style="padding:20px 20px 10px">
-    <div class="print-title">AutoCura — Storico Interventi</div>
-    <div class="print-meta" id="print-meta"></div>
-  </div>
-  <div id="print-content" style="padding:0 20px 20px"></div>
-</div>
-
-
-<!-- MODAL: NOME UTENTE -->
-<div class="modal-overlay" id="modal-username" onclick="closeModalOutside(event,'modal-username')">
-  <div class="modal">
-    <div class="modal-handle"></div>
-    <div class="modal-title">👤 Il tuo nome</div>
-    <div class="form-group">
-      <label class="form-label">Come ti chiami?</label>
-      <input class="form-input" id="username-input" placeholder="Es. Marco, Giulia..." type="text" maxlength="30"
-        onkeydown="if(event.key==='Enter') saveUsername()">
-    </div>
-    <p style="font-size:13px;color:var(--text2);margin-bottom:16px">Il saluto in home verrà personalizzato con il tuo nome.</p>
-    <button class="btn-primary" onclick="saveUsername()">Salva</button>
-  </div>
-</div>
-
-
-<!-- MODAL: MODIFICA AUTO -->
+<!-- EDIT CAR -->
 <div class="modal-overlay" id="modal-edit-car" onclick="closeModalOutside(event,'modal-edit-car')">
-  <div class="modal">
-    <div class="modal-handle"></div>
-    <div class="modal-title">✏️ Modifica Veicolo</div>
+  <div class="modal"><div class="modal-handle"></div><div class="modal-title">✏️ Modifica Veicolo</div>
     <div class="photo-picker" id="edit-photo-picker" onclick="document.getElementById('file-edit-car-photo').click()">
-      <div class="photo-picker-icon">📷</div>
-      <div class="photo-picker-label">Tocca per cambiare la foto</div>
+      <div class="photo-picker-icon">📷</div><div class="photo-picker-label">Tocca per cambiare la foto</div>
     </div>
-    <input type="file" id="file-edit-car-photo" accept="image/*" onchange="handleEditCarPhoto(event)">
-    <div class="form-group"><label class="form-label">Marca e Modello</label><input class="form-input" id="edit-car-name" placeholder="Es. Fiat 500, BMW Serie 3..." type="text"></div>
+    <div class="form-group"><label class="form-label">Marca e Modello</label><input class="form-input" id="edit-car-name" placeholder="Es. Fiat 500..." type="text"></div>
     <div class="form-row">
-      <div class="form-group"><label class="form-label">Targa</label><input class="form-input" id="edit-car-plate" placeholder="AB 123 CD" type="text" style="text-transform:uppercase"></div>
-      <div class="form-group"><label class="form-label">Anno</label><input class="form-input" id="edit-car-year" placeholder="2020" type="number"></div>
+      <div class="form-group"><label class="form-label">Targa</label><input class="form-input" id="edit-car-plate" type="text" style="text-transform:uppercase"></div>
+      <div class="form-group"><label class="form-label">Anno</label><input class="form-input" id="edit-car-year" type="number"></div>
     </div>
-    <div class="form-group"><label class="form-label">Chilometraggio attuale</label><input class="form-input" id="edit-car-km" placeholder="Es. 45000" type="number"></div>
+    <div class="form-group"><label class="form-label">Chilometraggio</label><input class="form-input" id="edit-car-km" type="number"></div>
     <div class="form-row">
       <div class="form-group"><label class="form-label">Scad. Revisione</label><input class="form-input" id="edit-car-revision" type="date"></div>
       <div class="form-group"><label class="form-label">Scad. Assicurazione</label><input class="form-input" id="edit-car-insurance" type="date"></div>
@@ -858,14 +368,1052 @@
   </div>
 </div>
 
-
-<!-- MODAL: DETTAGLIO INTERVENTO -->
-<div class="modal-overlay" id="modal-detail-event" onclick="closeModalOutside(event,'modal-detail-event')">
-  <div class="modal">
-    <div class="modal-handle"></div>
-    <div id="detail-content"></div>
+<!-- ADD EVENT -->
+<div class="modal-overlay" id="modal-add-event" onclick="closeModalOutside(event,'modal-add-event')">
+  <div class="modal"><div class="modal-handle"></div><div class="modal-title">🔧 Nuovo Intervento</div>
+    <div class="form-group"><label class="form-label">Veicolo</label><select class="form-select" id="event-car"></select></div>
+    <div class="form-group"><label class="form-label">Tipo intervento</label>
+      <select class="form-select" id="event-type">
+        <option value="🔩 Tagliando">🔩 Tagliando</option>
+        <option value="🛢️ Cambio olio">🛢️ Cambio olio</option>
+        <option value="🔋 Batteria">🔋 Batteria</option>
+        <option value="🦺 Gomme">🦺 Gomme</option>
+        <option value="🧊 Liquido freni">🧊 Liquido freni</option>
+        <option value="⚙️ Freni">⚙️ Freni</option>
+        <option value="💡 Lampadine">💡 Lampadine</option>
+        <option value="🔧 Meccanica generica">🔧 Meccanica generica</option>
+        <option value="🧴 Filtro aria">🧴 Filtro aria</option>
+        <option value="🏁 Revisione">🏁 Revisione</option>
+        <option value="🛡️ Assicurazione">🛡️ Assicurazione</option>
+        <option value="💊 Altro">💊 Altro</option>
+      </select>
+    </div>
+    <!-- Ricambi -->
+    <!-- Gomme toggle -->
+    <div class="gomme-section" id="gomme-section">
+      <label class="form-label">Stagione gomme</label>
+      <div class="olio-toggle">
+        <button type="button" class="olio-btn active" id="gomme-btn-estive" onclick="setGommeMode('estive','add')">☀️ Estive</button>
+        <button type="button" class="olio-btn" id="gomme-btn-invernali" onclick="setGommeMode('invernali','add')">❄️ Invernali</button>
+        <button type="button" class="olio-btn" id="gomme-btn-4stagioni" onclick="setGommeMode('4stagioni','add')">🔄 4 Stagioni</button>
+      </div>
+      <div class="form-row" style="margin-top:4px">
+        <div class="form-group"><label class="form-label">Misura (opz.)</label><input class="form-input" id="gomme-misura" placeholder="Es. 205/55 R16" type="text"></div>
+        <div class="form-group"><label class="form-label">Marca (opz.)</label><input class="form-input" id="gomme-marca" placeholder="Es. Michelin" type="text"></div>
+      </div>
+    </div>
+    <!-- Olio toggle -->
+    <div class="olio-section" id="olio-section">
+      <label class="form-label">Tipo operazione olio</label>
+      <div class="olio-toggle">
+        <button type="button" class="olio-btn active" id="olio-btn-cambio" onclick="setOlioMode('cambio','add')">🔄 Cambio completo</button>
+        <button type="button" class="olio-btn" id="olio-btn-rabbocco" onclick="setOlioMode('rabbocco','add')">🔻 Rabbocco</button>
+      </div>
+      <div id="olio-litri-wrap">
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Litri olio</label><input class="form-input" id="olio-litri" placeholder="Es. 4.5" type="number" step="0.1"></div>
+          <div class="form-group"><label class="form-label">Tipo olio</label><input class="form-input" id="olio-tipo" placeholder="Es. 5W-40 Full Synth." type="text"></div>
+        </div>
+      </div>
+    </div>
+    <div class="form-group ricambi-section" id="ricambi-section">
+      <label class="form-label">🔩 Ricambi utilizzati</label>
+      <div class="ricambi-grid" id="ricambi-grid"></div>
+      <div style="margin-top:10px">
+        <input class="form-input" id="ricambio-custom" placeholder="Aggiungi ricambio personalizzato..." type="text" style="font-size:14px" onkeydown="if(event.key==='Enter'){event.preventDefault();addCustomRicambio();}">
+      </div>
+    </div>
+    <!-- Ricorrente -->
+    <div class="form-group" style="display:flex;align-items:center;gap:10px">
+      <input type="checkbox" id="event-recurring" style="width:18px;height:18px;accent-color:var(--accent)">
+      <label for="event-recurring" style="font-size:14px;color:var(--text2);cursor:pointer">Intervento ricorrente</label>
+    </div>
+    <div id="recurring-opts" style="display:none;margin-bottom:14px">
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Ripeti ogni</label><input class="form-input" id="event-recur-val" type="number" min="1" placeholder="12" value="12"></div>
+        <div class="form-group"><label class="form-label">Unità</label>
+          <select class="form-select" id="event-recur-unit">
+            <option value="mesi">Mesi</option>
+            <option value="km">Km</option>
+            <option value="anni">Anni</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <!-- Foto intervento -->
+    <div class="form-group">
+      <label class="form-label">Foto intervento (opzionale)</label>
+      <div class="event-photo-area" id="event-photo-area" onclick="document.getElementById('file-event-photo').click()">
+        <span style="font-size:20px">📎</span>
+        <span class="ep-label">Allega una foto</span>
+      </div>
+    </div>
+    <div class="form-group"><label class="form-label">Note</label><textarea class="form-input" id="event-note" placeholder="Descrivi l'intervento nel dettaglio..." rows="3" style="resize:none;line-height:1.6;min-height:80px"></textarea></div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Data</label><input class="form-input" id="event-date" type="date"></div>
+      <div class="form-group"><label class="form-label">Costo (€)</label><input class="form-input" id="event-cost" placeholder="0,00" type="number" step="0.01"></div>
+    </div>
+    <div class="form-group"><label class="form-label">Km al momento</label><input class="form-input" id="event-km" placeholder="Es. 50000" type="number"></div>
+    <button class="btn-primary" onclick="addEvent()">Salva Intervento</button>
   </div>
 </div>
 
+<!-- EDIT EVENT -->
+<div class="modal-overlay" id="modal-edit-event" onclick="closeModalOutside(event,'modal-edit-event')">
+  <div class="modal"><div class="modal-handle"></div><div class="modal-title">✏️ Modifica Intervento</div>
+    <div class="form-group"><label class="form-label">Veicolo</label><select class="form-select" id="edit-event-car"></select></div>
+    <div class="form-group"><label class="form-label">Tipo intervento</label>
+      <select class="form-select" id="edit-event-type">
+        <option value="🔩 Tagliando">🔩 Tagliando</option>
+        <option value="🛢️ Cambio olio">🛢️ Cambio olio</option>
+        <option value="🔋 Batteria">🔋 Batteria</option>
+        <option value="🦺 Gomme">🦺 Gomme</option>
+        <option value="🧊 Liquido freni">🧊 Liquido freni</option>
+        <option value="⚙️ Freni">⚙️ Freni</option>
+        <option value="💡 Lampadine">💡 Lampadine</option>
+        <option value="🔧 Meccanica generica">🔧 Meccanica generica</option>
+        <option value="🧴 Filtro aria">🧴 Filtro aria</option>
+        <option value="🏁 Revisione">🏁 Revisione</option>
+        <option value="🛡️ Assicurazione">🛡️ Assicurazione</option>
+        <option value="💊 Altro">💊 Altro</option>
+      </select>
+    </div>
+    <!-- Edit ricambi -->
+    <!-- Edit gomme toggle -->
+    <div class="gomme-section" id="edit-gomme-section">
+      <label class="form-label">Stagione gomme</label>
+      <div class="olio-toggle">
+        <button type="button" class="olio-btn active" id="edit-gomme-btn-estive" onclick="setGommeMode('estive','edit')">☀️ Estive</button>
+        <button type="button" class="olio-btn" id="edit-gomme-btn-invernali" onclick="setGommeMode('invernali','edit')">❄️ Invernali</button>
+        <button type="button" class="olio-btn" id="edit-gomme-btn-4stagioni" onclick="setGommeMode('4stagioni','edit')">🔄 4 Stagioni</button>
+      </div>
+      <div class="form-row" style="margin-top:4px">
+        <div class="form-group"><label class="form-label">Misura (opz.)</label><input class="form-input" id="edit-gomme-misura" placeholder="Es. 205/55 R16" type="text"></div>
+        <div class="form-group"><label class="form-label">Marca (opz.)</label><input class="form-input" id="edit-gomme-marca" placeholder="Es. Michelin" type="text"></div>
+      </div>
+    </div>
+    <!-- Edit olio toggle -->
+    <div class="olio-section" id="edit-olio-section">
+      <label class="form-label">Tipo operazione olio</label>
+      <div class="olio-toggle">
+        <button type="button" class="olio-btn active" id="edit-olio-btn-cambio" onclick="setOlioMode('cambio','edit')">🔄 Cambio completo</button>
+        <button type="button" class="olio-btn" id="edit-olio-btn-rabbocco" onclick="setOlioMode('rabbocco','edit')">🔻 Rabbocco</button>
+      </div>
+      <div id="edit-olio-litri-wrap">
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Litri olio</label><input class="form-input" id="edit-olio-litri" placeholder="Es. 4.5" type="number" step="0.1"></div>
+          <div class="form-group"><label class="form-label">Tipo olio</label><input class="form-input" id="edit-olio-tipo" placeholder="Es. 5W-40 Full Synth." type="text"></div>
+        </div>
+      </div>
+    </div>
+    <div class="form-group ricambi-section" id="edit-ricambi-section">
+      <label class="form-label">🔩 Ricambi utilizzati</label>
+      <div class="ricambi-grid" id="edit-ricambi-grid"></div>
+      <div style="margin-top:10px">
+        <input class="form-input" id="edit-ricambio-custom" placeholder="Aggiungi ricambio personalizzato..." type="text" style="font-size:14px" onkeydown="if(event.key==='Enter'){event.preventDefault();addCustomRicambio('edit');}">
+      </div>
+    </div>
+    <!-- Edit foto intervento -->
+    <div class="form-group">
+      <label class="form-label">Foto intervento</label>
+      <div class="event-photo-area" id="edit-event-photo-area" onclick="document.getElementById('file-edit-event-photo').click()">
+        <span style="font-size:20px">📎</span>
+        <span class="ep-label">Allega una foto</span>
+      </div>
+    </div>
+    <div class="form-group"><label class="form-label">Note</label><textarea class="form-input" id="edit-event-note" placeholder="Descrivi l'intervento..." rows="3" style="resize:none;line-height:1.6;min-height:80px"></textarea></div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Data</label><input class="form-input" id="edit-event-date" type="date"></div>
+      <div class="form-group"><label class="form-label">Costo (€)</label><input class="form-input" id="edit-event-cost" type="number" step="0.01"></div>
+    </div>
+    <div class="form-group"><label class="form-label">Km al momento</label><input class="form-input" id="edit-event-km" type="number"></div>
+    <button class="btn-primary" onclick="saveEditEvent()">Salva Modifiche</button>
+    <button class="btn-danger" onclick="deleteEvent()">🗑️ Elimina Intervento</button>
+  </div>
+</div>
+
+<!-- ADD FUEL -->
+<div class="modal-overlay" id="modal-add-fuel" onclick="closeModalOutside(event,'modal-add-fuel')">
+  <div class="modal"><div class="modal-handle"></div><div class="modal-title">⛽ Rifornimento</div>
+    <div class="form-group"><label class="form-label">Veicolo</label><select class="form-select" id="fuel-car"></select></div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Litri</label><input class="form-input" id="fuel-liters" placeholder="40" type="number" step="0.1"></div>
+      <div class="form-group"><label class="form-label">€/litro</label><input class="form-input" id="fuel-price" placeholder="1.85" type="number" step="0.001"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Totale (€)</label><input class="form-input" id="fuel-total" placeholder="74.00" type="number" step="0.01"></div>
+      <div class="form-group"><label class="form-label">Km al momento</label><input class="form-input" id="fuel-km" placeholder="50000" type="number"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Data</label><input class="form-input" id="fuel-date" type="date"></div>
+      <div class="form-group"><label class="form-label">Tipo carburante</label>
+        <select class="form-select" id="fuel-type">
+          <option value="Benzina">Benzina</option>
+          <option value="Diesel">Diesel</option>
+          <option value="GPL">GPL</option>
+          <option value="Metano">Metano</option>
+          <option value="Elettrico">Elettrico</option>
+          <option value="Ibrido">Ibrido</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group"><label class="form-label">Note (opzionale)</label><input class="form-input" id="fuel-note" placeholder="Es. Pieno completo, autostrada..." type="text"></div>
+    <button class="btn-primary" onclick="addFuel()">Salva Rifornimento</button>
+  </div>
+</div>
+
+<!-- ADD SCHEDULED -->
+<div class="modal-overlay" id="modal-add-scheduled" onclick="closeModalOutside(event,'modal-add-scheduled')">
+  <div class="modal"><div class="modal-handle"></div><div class="modal-title">📅 Pianifica Intervento</div>
+    <div class="form-group"><label class="form-label">Veicolo</label><select class="form-select" id="sched-car"></select></div>
+    <div class="form-group"><label class="form-label">Tipo intervento</label>
+      <select class="form-select" id="sched-type">
+        <option value="🔩 Tagliando">🔩 Tagliando</option>
+        <option value="🛢️ Cambio olio">🛢️ Cambio olio</option>
+        <option value="🔋 Batteria">🔋 Batteria</option>
+        <option value="🦺 Gomme">🦺 Gomme</option>
+        <option value="⚙️ Freni">⚙️ Freni</option>
+        <option value="🔧 Meccanica generica">🔧 Meccanica generica</option>
+        <option value="🏁 Revisione">🏁 Revisione</option>
+        <option value="🛡️ Assicurazione">🛡️ Assicurazione</option>
+        <option value="💊 Altro">💊 Altro</option>
+      </select>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Data prevista</label><input class="form-input" id="sched-date" type="date"></div>
+      <div class="form-group"><label class="form-label">Km previsti</label><input class="form-input" id="sched-km" placeholder="Es. 60000" type="number"></div>
+    </div>
+    <div class="form-group"><label class="form-label">Note</label><input class="form-input" id="sched-note" placeholder="Es. Tagliando completo" type="text"></div>
+    <button class="btn-primary" onclick="addScheduled()">Pianifica</button>
+  </div>
+</div>
+
+<!-- DETAIL EVENT -->
+<div class="modal-overlay" id="modal-detail-event" onclick="closeModalOutside(event,'modal-detail-event')">
+  <div class="modal"><div class="modal-handle"></div><div id="detail-content"></div></div>
+</div>
+
+<script>
+// ══════════════════════════════════════════
+// DATA
+// ══════════════════════════════════════════
+let cars     = JSON.parse(localStorage.getItem('autocura_cars')      || '[]');
+let events   = JSON.parse(localStorage.getItem('autocura_events')    || '[]');
+let fuels    = JSON.parse(localStorage.getItem('autocura_fuels')     || '[]');
+let scheduled= JSON.parse(localStorage.getItem('autocura_scheduled') || '[]');
+let username = localStorage.getItem('autocura_username') || '';
+let pendingCarPhoto = null;
+let editingCarPhoto = null;
+let pendingEventPhoto = null;
+let editingEventPhoto = null;
+
+function save() {
+  localStorage.setItem('autocura_cars',      JSON.stringify(cars));
+  localStorage.setItem('autocura_events',    JSON.stringify(events));
+  localStorage.setItem('autocura_fuels',     JSON.stringify(fuels));
+  localStorage.setItem('autocura_scheduled', JSON.stringify(scheduled));
+}
+
+// ══════════════════════════════════════════
+// PAGES & NAV
+// ══════════════════════════════════════════
+function switchPage(pageId, navId) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById(pageId).classList.add('active');
+  if (navId) document.getElementById(navId)?.classList.add('active');
+  if (pageId==='page-stats')   renderStats();
+  if (pageId==='page-history') renderHistoryFull();
+  window.scrollTo(0,0);
+}
+
+// ══════════════════════════════════════════
+// MODALS
+// ══════════════════════════════════════════
+function openModal(id) {
+  if (id==='modal-add-event'||id==='modal-add-fuel'||id==='modal-add-scheduled') populateCarSelects();
+  if (id==='modal-add-event') { resetEventPhotoArea('event-photo-area'); pendingEventPhoto=null; pendingRicambi=[]; document.getElementById('ricambi-section').classList.remove('visible'); document.getElementById('event-recurring').checked=false; document.getElementById('recurring-opts').style.display='none'; }
+  document.getElementById(id).classList.add('open');
+  document.querySelectorAll('#'+id+' input[type="date"]').forEach(d=>{if(!d.value)d.value=new Date().toISOString().split('T')[0];});
+}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+function closeModalOutside(e,id){if(e.target.id===id)closeModal(id);}
+
+document.getElementById('event-recurring').addEventListener('change',function(){
+  document.getElementById('recurring-opts').style.display=this.checked?'block':'none';
+});
+
+function populateCarSelects() {
+  const opts = cars.length ? cars.map((c,i)=>`<option value="${i}">${c.name}${c.plate?' · '+c.plate:''}</option>`).join('') : '<option>Nessun veicolo</option>';
+  ['event-car','fuel-car','sched-car','edit-event-car'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=opts;});
+}
+
+// ══════════════════════════════════════════
+// IMAGE UTILS
+// ══════════════════════════════════════════
+function compressImage(file,callback){
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    const img=new Image();
+    img.onload=()=>{
+      const canvas=document.createElement('canvas');
+      const MAX=700; let w=img.width,h=img.height;
+      if(w>h){if(w>MAX){h=h*MAX/w;w=MAX;}}else{if(h>MAX){w=w*MAX/h;h=MAX;}}
+      canvas.width=w;canvas.height=h;
+      canvas.getContext('2d').drawImage(img,0,0,w,h);
+      callback(canvas.toDataURL('image/jpeg',0.78));
+    };img.src=ev.target.result;
+  };reader.readAsDataURL(file);
+}
+function setPickerPhoto(pickerId,base64,changeInputId){
+  const picker=document.getElementById(pickerId);
+  picker.classList.add('has-photo');
+  let img=picker.querySelector('img');
+  if(!img){img=document.createElement('img');picker.prepend(img);}
+  img.src=base64;
+  let btn=picker.querySelector('.photo-overlay-btn');
+  if(!btn){btn=document.createElement('button');btn.className='photo-overlay-btn';btn.textContent='✏️ Cambia';btn.onclick=ev=>{ev.stopPropagation();document.getElementById(changeInputId).click();};picker.appendChild(btn);}
+}
+function resetPicker(pickerId){
+  const picker=document.getElementById(pickerId);
+  picker.classList.remove('has-photo');
+  const img=picker.querySelector('img');if(img)img.remove();
+  const btn=picker.querySelector('.photo-overlay-btn');if(btn)btn.remove();
+}
+function setEventPhotoArea(areaId, base64, changeInputId){
+  const area=document.getElementById(areaId);
+  area.classList.add('has-photo');
+  let img=area.querySelector('img');
+  if(!img){img=document.createElement('img');area.prepend(img);}
+  img.src=base64;
+  let btn=area.querySelector('.ep-overlay-btn');
+  if(!btn){btn=document.createElement('button');btn.className='ep-overlay-btn';btn.textContent='✏️ Cambia';btn.onclick=ev=>{ev.stopPropagation();document.getElementById(changeInputId).click();};area.appendChild(btn);}
+}
+function resetEventPhotoArea(areaId){
+  const area=document.getElementById(areaId);
+  area.classList.remove('has-photo');
+  const img=area.querySelector('img');if(img)img.remove();
+  const btn=area.querySelector('.ep-overlay-btn');if(btn)btn.remove();
+}
+// Car photo handlers
+function handleCarPhotoModal(e){const f=e.target.files[0];if(!f)return;compressImage(f,b=>{pendingCarPhoto=b;setPickerPhoto('photo-picker',b,'file-car-photo');});e.target.value='';}
+function handleEditCarPhoto(e){const f=e.target.files[0];if(!f)return;compressImage(f,b=>{editingCarPhoto=b;setPickerPhoto('edit-photo-picker',b,'file-edit-car-photo');});e.target.value='';}
+function updateCardPhoto(carIdx){
+  const input=document.getElementById('file-card-photo');
+  input.onchange=e=>{const f=e.target.files[0];if(!f)return;compressImage(f,b=>{cars[carIdx].photo=b;save();renderCars();showToast('Foto aggiornata!');});input.value='';};
+  input.click();
+}
+// Event photo handlers
+function handleEventPhoto(e,mode){
+  const f=e.target.files[0];if(!f)return;
+  compressImage(f,b=>{
+    if(mode==='add'){pendingEventPhoto=b;setEventPhotoArea('event-photo-area',b,'file-event-photo');}
+    else{editingEventPhoto=b;setEventPhotoArea('edit-event-photo-area',b,'file-edit-event-photo');}
+  });e.target.value='';
+}
+
+// ══════════════════════════════════════════
+// USERNAME
+// ══════════════════════════════════════════
+function getGreeting(){const h=new Date().getHours();return h>=5&&h<12?'Buongiorno':h>=12&&h<18?'Buon pomeriggio':'Buonasera';}
+function updateGreeting(){const el=document.getElementById('main-greeting');if(!el)return;el.textContent=username?`${getGreeting()}, ${username}! 👋`:`${getGreeting()} 👋`;}
+function openModal_username(){document.getElementById('username-input').value=username;openModal('modal-username');setTimeout(()=>document.getElementById('username-input').focus(),350);}
+function saveUsername(){const v=document.getElementById('username-input').value.trim();username=v;localStorage.setItem('autocura_username',username);closeModal('modal-username');updateGreeting();showToast(username?`Ciao, ${username}!`:'Nome rimosso');}
+
+// ══════════════════════════════════════════
+// CARS
+// ══════════════════════════════════════════
+function addCar(){
+  const name=document.getElementById('car-name').value.trim();
+  if(!name){alert('Inserisci il nome del veicolo');return;}
+  cars.push({name,plate:document.getElementById('car-plate').value.toUpperCase().trim(),year:document.getElementById('car-year').value,km:parseInt(document.getElementById('car-km').value)||0,revision:document.getElementById('car-revision').value,insurance:document.getElementById('car-insurance').value,photo:pendingCarPhoto||null});
+  save();closeModal('modal-add-car');
+  ['car-name','car-plate','car-year','car-km','car-revision','car-insurance'].forEach(id=>document.getElementById(id).value='');
+  resetPicker('photo-picker');pendingCarPhoto=null;
+  render();showToast('Veicolo aggiunto!');
+}
+let editingCarIdx=null;
+function openEditCar(idx){
+  editingCarIdx=idx;editingCarPhoto=null;
+  const c=cars[idx];
+  resetPicker('edit-photo-picker');
+  if(c.photo)setPickerPhoto('edit-photo-picker',c.photo,'file-edit-car-photo');
+  document.getElementById('edit-car-name').value=c.name;
+  document.getElementById('edit-car-plate').value=c.plate||'';
+  document.getElementById('edit-car-year').value=c.year||'';
+  document.getElementById('edit-car-km').value=c.km||'';
+  document.getElementById('edit-car-revision').value=c.revision||'';
+  document.getElementById('edit-car-insurance').value=c.insurance||'';
+  document.getElementById('modal-edit-car').classList.add('open');
+}
+function saveEditCar(){
+  if(editingCarIdx===null)return;
+  const name=document.getElementById('edit-car-name').value.trim();
+  if(!name){alert('Inserisci il nome');return;}
+  const c=cars[editingCarIdx];
+  c.name=name;c.plate=document.getElementById('edit-car-plate').value.toUpperCase().trim();
+  c.year=document.getElementById('edit-car-year').value;
+  c.km=parseInt(document.getElementById('edit-car-km').value)||0;
+  c.revision=document.getElementById('edit-car-revision').value;
+  c.insurance=document.getElementById('edit-car-insurance').value;
+  if(editingCarPhoto)c.photo=editingCarPhoto;
+  save();closeModal('modal-edit-car');editingCarIdx=null;editingCarPhoto=null;render();showToast('Veicolo aggiornato!');
+}
+function deleteCar(){
+  if(editingCarIdx===null)return;
+  const name=cars[editingCarIdx].name;
+  if(!confirm(`Eliminare "${name}" e tutti i suoi dati?`))return;
+  events=events.filter(e=>e.carIdx!==editingCarIdx);
+  events.forEach(e=>{if(e.carIdx>editingCarIdx)e.carIdx--;});
+  fuels=fuels.filter(f=>f.carIdx!==editingCarIdx);
+  fuels.forEach(f=>{if(f.carIdx>editingCarIdx)f.carIdx--;});
+  scheduled=scheduled.filter(s=>s.carIdx!==editingCarIdx);
+  scheduled.forEach(s=>{if(s.carIdx>editingCarIdx)s.carIdx--;});
+  cars.splice(editingCarIdx,1);
+  save();closeModal('modal-edit-car');editingCarIdx=null;render();renderHistoryFull();showToast(`"${name}" eliminata`);
+}
+function getCarUrgency(car){
+  const today=new Date();
+  const chk=ds=>{if(!ds)return'ok';const diff=(new Date(ds)-today)/86400000;return diff<0?'critical':diff<30?'warn':'ok';};
+  const r=chk(car.revision),ins=chk(car.insurance);
+  if(r==='critical'||ins==='critical')return'critical';
+  if(r==='warn'||ins==='warn')return'warn';
+  return'ok';
+}
+function renderCars(){
+  const container=document.getElementById('cars-container');
+  if(!cars.length){container.innerHTML=`<div class="car-card" style="cursor:pointer;opacity:0.5;min-width:160px" onclick="openModal('modal-add-car')"><div class="car-photo-wrap"><div class="car-photo-placeholder">➕</div></div><div class="car-info"><div class="car-name">Aggiungi Auto</div></div></div>`;return;}
+  container.innerHTML=cars.map((c,i)=>{
+    const urg=getCarUrgency(c);
+    const dotColor=urg==='ok'?'var(--green)':urg==='warn'?'var(--orange)':'var(--red)';
+    const lastEv=events.filter(e=>e.carIdx===i).sort((a,b)=>new Date(b.date)-new Date(a.date))[0];
+    const lastDate=lastEv&&lastEv.date?new Date(lastEv.date).toLocaleDateString('it-IT',{day:'2-digit',month:'short'}):'—';
+    return `<div class="car-card" onclick="openVehiclePage(${i})">
+      <div class="car-photo-wrap">
+        ${c.photo?`<img src="${c.photo}" alt="${c.name}">`:'<div class="car-photo-placeholder">🚗</div>'}
+        <div class="car-photo-gradient"></div>
+        <div class="car-urgency-dot" style="background:${dotColor}"></div>
+        <button class="car-edit-btn" onclick="event.stopPropagation();openEditCar(${i})">✏️</button>
+        <button class="photo-upload-btn" onclick="event.stopPropagation();updateCardPhoto(${i})">📷</button>
+      </div>
+      <div class="car-info">
+        <div class="car-name">${c.name}</div>
+        ${c.plate?`<div class="car-plate">${c.plate}</div>`:''}
+        <div class="car-km">Km: <strong>${c.km.toLocaleString('it-IT')}</strong></div>
+        <div style="font-size:10px;color:var(--text3);margin-top:3px">Ultimo: ${lastDate}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// VEHICLE PAGE
+function openVehiclePage(idx){
+  const c=cars[idx];
+  document.getElementById('vehicle-page-sub').textContent=c.plate||c.name;
+  const carEvents=events.filter(e=>e.carIdx===idx).sort((a,b)=>new Date(b.date)-new Date(a.date));
+  const carFuels=fuels.filter(f=>f.carIdx===idx).sort((a,b)=>new Date(b.date)-new Date(a.date));
+  const totalCost=carEvents.reduce((s,e)=>s+e.cost,0);
+  const totalFuel=carFuels.reduce((s,f)=>s+(f.total||0),0);
+  const totalLiters=carFuels.reduce((s,f)=>s+(f.liters||0),0);
+
+  // Urgency checks
+  const today=new Date();
+  const revDiff=c.revision?Math.round((new Date(c.revision)-today)/86400000):null;
+  const insDiff=c.insurance?Math.round((new Date(c.insurance)-today)/86400000):null;
+  const urgBadge=(diff,label)=>{
+    if(diff===null)return`<span style="color:var(--text3)">—</span>`;
+    const color=diff<0?'var(--red)':diff<30?'var(--orange)':'var(--green)';
+    const txt=diff<0?'Scaduta':diff===0?'Oggi!':diff<30?`${diff}gg`:new Date(c[label]).toLocaleDateString('it-IT');
+    return`<span style="color:${color};font-weight:600">${txt}</span>`;
+  };
+
+  document.getElementById('vehicle-content').innerHTML=`
+    ${c.photo?`<div style="width:100%;height:180px;border-radius:var(--radius);overflow:hidden;margin-bottom:20px"><img src="${c.photo}" style="width:100%;height:100%;object-fit:cover"></div>`:''}
+    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:18px;margin-bottom:16px">
+      <div style="font-size:22px;font-weight:700;margin-bottom:4px">${c.name}</div>
+      ${c.plate?`<div style="font-size:12px;color:var(--text2);font-weight:600;letter-spacing:1px;background:var(--surface3);display:inline-block;padding:3px 10px;border-radius:6px;margin-bottom:14px">${c.plate}</div>`:''}
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div style="background:var(--surface3);border-radius:10px;padding:12px;text-align:center"><div style="font-size:18px;font-weight:700">${c.km.toLocaleString('it-IT')}</div><div style="font-size:11px;color:var(--text2);margin-top:2px">KM ATTUALI</div></div>
+        <div style="background:var(--surface3);border-radius:10px;padding:12px;text-align:center"><div style="font-size:18px;font-weight:700">${c.year||'—'}</div><div style="font-size:11px;color:var(--text2);margin-top:2px">ANNO</div></div>
+        <div style="background:var(--surface3);border-radius:10px;padding:12px;text-align:center"><div style="font-size:15px;font-weight:700">${urgBadge(revDiff,'revision')}</div><div style="font-size:11px;color:var(--text2);margin-top:2px">REVISIONE</div></div>
+        <div style="background:var(--surface3);border-radius:10px;padding:12px;text-align:center"><div style="font-size:15px;font-weight:700">${urgBadge(insDiff,'insurance')}</div><div style="font-size:11px;color:var(--text2);margin-top:2px">ASSICURAZIONE</div></div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:20px">
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px;text-align:center"><div style="font-size:18px;font-weight:700;color:var(--accent)">€${totalCost.toFixed(0)}</div><div style="font-size:10px;color:var(--text2);margin-top:3px">MANUT.</div></div>
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px;text-align:center"><div style="font-size:18px;font-weight:700;color:var(--orange)">€${totalFuel.toFixed(0)}</div><div style="font-size:10px;color:var(--text2);margin-top:3px">CARBURANTE</div></div>
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px;text-align:center"><div style="font-size:18px;font-weight:700;color:var(--green)">${totalLiters.toFixed(0)}L</div><div style="font-size:10px;color:var(--text2);margin-top:3px">LITRI</div></div>
+    </div>
+    ${carEvents.length?`<div style="font-size:16px;font-weight:600;margin-bottom:12px">Ultimi interventi</div><div style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px">${carEvents.slice(0,5).map((e,i)=>miniEventItem(e,events.indexOf(e))).join('')}</div>`:''}
+    ${carFuels.length?`<div style="font-size:16px;font-weight:600;margin-bottom:12px">Ultimi rifornimenti</div><div style="display:flex;flex-direction:column;gap:10px;padding-bottom:20px">${carFuels.slice(0,5).map(f=>miniFuelItem(f)).join('')}</div>`:''}
+  `;
+  switchPage('page-vehicle',null);
+}
+function miniEventItem(e,idx){
+  const date=e.date?new Date(e.date).toLocaleDateString('it-IT',{day:'2-digit',month:'short'}):'—';
+  return`<div class="history-item" onclick="openDetailEvent(${idx})">
+    <div class="history-thumb">${e.type.split(' ')[0]}</div>
+    <div class="history-info"><div class="history-title">${e.type.split(' ').slice(1).join(' ')}</div><div class="history-meta">${date}${e.km?' · '+e.km.toLocaleString('it-IT')+' km':''}</div></div>
+    ${e.cost?`<div class="history-cost">€${e.cost.toFixed(0)}</div>`:''}
+  </div>`;
+}
+function miniFuelItem(f){
+  const car=cars[f.carIdx];
+  const date=f.date?new Date(f.date).toLocaleDateString('it-IT',{day:'2-digit',month:'short'}):'—';
+  return`<div class="fuel-item">
+    <div class="fuel-icon">⛽</div>
+    <div class="fuel-info"><div class="fuel-title">${f.type||'Carburante'} · ${f.liters||0}L</div><div class="fuel-meta">${date}${f.km?' · '+f.km.toLocaleString('it-IT')+' km':''}</div></div>
+    ${f.total?`<div class="fuel-cost">€${f.total.toFixed(0)}</div>`:''}
+  </div>`;
+}
+
+// ══════════════════════════════════════════
+// ALERTS
+// ══════════════════════════════════════════
+function renderAlerts(){
+  const container=document.getElementById('alerts-container');
+  const today=new Date();const list=[];
+  cars.forEach(c=>{
+    const chk=(label,ds,icon)=>{
+      if(!ds)return;const d=new Date(ds);const diff=Math.round((d-today)/86400000);
+      const level=diff<0?'red':diff<15?'red':diff<30?'orange':diff<60?'orange':null;
+      if(!level)return;
+      list.push({icon,label:`${c.name} — ${label}`,sub:diff<0?'Scaduta il '+d.toLocaleDateString('it-IT'):'Scade il '+d.toLocaleDateString('it-IT'),level,badge:diff<0?'Scaduta':`${diff}gg`});
+    };
+    chk('Revisione',c.revision,'🏁');chk('Assicurazione',c.insurance,'📋');
+  });
+  document.getElementById('qs-alerts').textContent=list.length;
+  if(!list.length){container.innerHTML=`<div class="alert-item"><div class="alert-icon green">✅</div><div class="alert-info"><div class="alert-title">Tutto in ordine</div><div class="alert-sub">Nessuna scadenza imminente</div></div></div>`;return;}
+  container.innerHTML=list.map(a=>`<div class="alert-item"><div class="alert-icon ${a.level}">${a.icon}</div><div class="alert-info"><div class="alert-title">${a.label}</div><div class="alert-sub">${a.sub}</div></div><div class="alert-badge badge-${a.level}">${a.badge}</div></div>`).join('');
+}
+
+// ══════════════════════════════════════════
+// SCHEDULED
+// ══════════════════════════════════════════
+function addScheduled(){
+  if(!cars.length){alert('Prima aggiungi un veicolo');return;}
+  const s={carIdx:parseInt(document.getElementById('sched-car').value),type:document.getElementById('sched-type').value,date:document.getElementById('sched-date').value,km:parseInt(document.getElementById('sched-km').value)||0,note:document.getElementById('sched-note').value,done:false};
+  scheduled.push(s);save();closeModal('modal-add-scheduled');
+  ['sched-date','sched-km','sched-note'].forEach(id=>document.getElementById(id).value='');
+  renderScheduled();showToast('Intervento pianificato!');
+}
+function markScheduledDone(idx){
+  if(!confirm('Segna come completato?'))return;
+  scheduled[idx].done=true;save();renderScheduled();showToast('Completato!');
+}
+function deleteScheduled(idx){
+  scheduled.splice(idx,1);save();renderScheduled();
+}
+function renderScheduled(){
+  const container=document.getElementById('scheduled-container');
+  const pending=scheduled.map((s,i)=>({...s,_i:i})).filter(s=>!s.done);
+  if(!pending.length){container.innerHTML=`<div class="empty-state" style="padding:20px 0"><div class="emoji">📅</div><p>Nessun intervento pianificato</p></div>`;return;}
+  const today=new Date();
+  container.innerHTML=pending.map(s=>{
+    const car=cars[s.carIdx];
+    const carName=car?car.name:'?';
+    const date=s.date?new Date(s.date).toLocaleDateString('it-IT'):'—';
+    const diff=s.date?Math.round((new Date(s.date)-today)/86400000):null;
+    const badge=diff===null?'':diff<0?'Scaduto':diff===0?'Oggi':diff<=7?`${diff}gg`:'';
+    return`<div class="sched-item">
+      <div class="sched-icon">${s.type.split(' ')[0]}</div>
+      <div class="sched-info">
+        <div class="sched-title">${s.type.split(' ').slice(1).join(' ')}</div>
+        <div class="sched-meta">${carName} · ${date}${s.km?' · '+s.km.toLocaleString('it-IT')+' km':''}${s.note?' · '+s.note:''}</div>
+      </div>
+      ${badge?`<div class="sched-badge">${badge}</div>`:''}
+      <button class="btn-icon btn-edit" onclick="event.stopPropagation();markScheduledDone(${s._i})" title="Completato" style="margin-left:4px">✅</button>
+      <button class="btn-icon btn-delete" onclick="event.stopPropagation();deleteScheduled(${s._i})" title="Elimina">🗑️</button>
+    </div>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════════
+// EVENTS
+// ══════════════════════════════════════════
+function addEvent(){
+  if(!cars.length){alert('Prima aggiungi un veicolo');return;}
+  const carIdx=parseInt(document.getElementById('event-car').value);
+  const recurring=document.getElementById('event-recurring').checked;
+  const ev={
+    carIdx,
+    type:document.getElementById('event-type').value,
+    ricambi:[...pendingRicambi],
+    olioMode:document.getElementById("olio-section").classList.contains("visible")?pendingOlioMode:null,
+    gommeMode:document.getElementById("gomme-section").classList.contains("visible")?pendingGommeMode:null,
+    gommeMisura:document.getElementById("gomme-misura").value.trim()||null,
+    gommeMarca:document.getElementById("gomme-marca").value.trim()||null,
+    olioLitri:parseFloat(document.getElementById("olio-litri").value)||null,
+    olioTipo:document.getElementById("olio-tipo").value.trim()||null,
+    note:document.getElementById('event-note').value,
+    date:document.getElementById('event-date').value,
+    cost:parseFloat(document.getElementById('event-cost').value)||0,
+    km:parseInt(document.getElementById('event-km').value)||0,
+    photo:pendingEventPhoto||null,
+    recurring:recurring?{val:parseInt(document.getElementById('event-recur-val').value)||12,unit:document.getElementById('event-recur-unit').value}:null
+  };
+  events.unshift(ev);
+  if(ev.km>cars[carIdx].km)cars[carIdx].km=ev.km;
+  // If recurring, auto-create scheduled entry
+  if(ev.recurring&&ev.date){
+    const nextDate=new Date(ev.date);
+    const unit=ev.recurring.unit,val=ev.recurring.val;
+    if(unit==='mesi')nextDate.setMonth(nextDate.getMonth()+val);
+    else if(unit==='anni')nextDate.setFullYear(nextDate.getFullYear()+val);
+    else if(unit==='km'){/* km-based: just note it */}
+    if(unit!=='km')scheduled.push({carIdx,type:ev.type,date:nextDate.toISOString().split('T')[0],km:unit==='km'?(ev.km+val):0,note:`Ricorrente ogni ${val} ${unit}`,done:false});
+  }
+  save();closeModal('modal-add-event');
+  ['event-note','event-cost','event-km'].forEach(id=>document.getElementById(id).value='');
+  pendingEventPhoto=null;pendingRicambi=[];pendingOlioMode='cambio';pendingGommeMode='estive';document.getElementById('ricambi-section').classList.remove('visible');document.getElementById('olio-section').classList.remove('visible');document.getElementById('gomme-section').classList.remove('visible');['olio-litri','olio-tipo','gomme-misura','gomme-marca'].forEach(id=>document.getElementById(id).value='');resetEventPhotoArea('event-photo-area');
+  render();showToast('Intervento salvato!');
+}
+
+let editingEventIdx=null;
+function openEditEvent(idx){
+  editingEventIdx=idx;editingEventPhoto=null;
+  const e=events[idx];
+  populateCarSelects();
+  document.getElementById('edit-event-car').value=e.carIdx;
+  document.getElementById('edit-event-type').value=e.type;
+  document.getElementById('edit-event-note').value=e.note||'';
+  document.getElementById('edit-event-date').value=e.date||'';
+  document.getElementById('edit-event-cost').value=e.cost||'';
+  document.getElementById('edit-event-km').value=e.km||'';
+  resetEventPhotoArea('edit-event-photo-area');
+  if(e.photo)setEventPhotoArea('edit-event-photo-area',e.photo,'file-edit-event-photo');
+  editRicambi = e.ricambi ? [...e.ricambi] : [];
+  editOlioMode = e.olioMode || 'cambio';
+  showRicambiSection(e.type, 'edit');
+  // Populate olio fields
+  document.getElementById('edit-olio-litri').value = e.olioLitri || '';
+  document.getElementById('edit-olio-tipo').value = e.olioTipo || '';
+  setOlioMode(editOlioMode, 'edit');
+  editGommeMode = e.gommeMode || 'estive';
+  document.getElementById('edit-gomme-misura').value = e.gommeMisura || '';
+  document.getElementById('edit-gomme-marca').value = e.gommeMarca || '';
+  setGommeMode(editGommeMode, 'edit');
+  document.getElementById('modal-edit-event').classList.add('open');
+}
+function saveEditEvent(){
+  if(editingEventIdx===null)return;
+  const carIdx=parseInt(document.getElementById('edit-event-car').value);
+  const e=events[editingEventIdx];
+  e.carIdx=carIdx;e.type=document.getElementById('edit-event-type').value;
+  e.note=document.getElementById('edit-event-note').value;
+  e.ricambi=[...editRicambi];
+  e.olioMode=document.getElementById("edit-olio-section").classList.contains("visible")?editOlioMode:null;
+  e.gommeMode=document.getElementById("edit-gomme-section").classList.contains("visible")?editGommeMode:null;
+  e.gommeMisura=document.getElementById("edit-gomme-misura").value.trim()||null;
+  e.gommeMarca=document.getElementById("edit-gomme-marca").value.trim()||null;
+  e.olioLitri=parseFloat(document.getElementById("edit-olio-litri").value)||null;
+  e.olioTipo=document.getElementById("edit-olio-tipo").value.trim()||null;
+  e.date=document.getElementById('edit-event-date').value;
+  e.cost=parseFloat(document.getElementById('edit-event-cost').value)||0;
+  e.km=parseInt(document.getElementById('edit-event-km').value)||0;
+  if(editingEventPhoto)e.photo=editingEventPhoto;
+  save();closeModal('modal-edit-event');editingEventIdx=null;editingEventPhoto=null;
+  render();renderHistoryFull();showToast('Intervento aggiornato!');
+}
+function deleteEvent(){
+  if(editingEventIdx===null)return;
+  if(!confirm('Eliminare questo intervento?'))return;
+  events.splice(editingEventIdx,1);save();closeModal('modal-edit-event');editingEventIdx=null;
+  render();renderHistoryFull();showToast('Intervento eliminato');
+}
+function confirmDeleteEvent(idx){
+  if(!confirm('Eliminare questo intervento?'))return;
+  events.splice(idx,1);save();render();renderHistoryFull();showToast('Intervento eliminato');
+}
+
+// DETAIL
+function openDetailEvent(idx){
+  const e=events[idx];const car=cars[e.carIdx];
+  const date=e.date?new Date(e.date).toLocaleDateString('it-IT',{day:'2-digit',month:'long',year:'numeric'}):'—';
+  const typeEmoji=e.type.split(' ')[0];const typeLabel=e.type.split(' ').slice(1).join(' ');
+  const carName=car?`${car.name}${car.plate?' · '+car.plate:''}`:'Veicolo rimosso';
+  // Show event photo or car photo
+  const photoSrc=e.photo||(car?.photo)||null;
+  document.getElementById('detail-content').innerHTML=`
+    <div class="detail-photo">${photoSrc?`<img src="${photoSrc}" alt="">`:`${typeEmoji}`}</div>
+    <div class="detail-badge">${typeEmoji} <span>${typeLabel}</span></div>
+    <div style="font-size:19px;font-weight:700;margin-bottom:3px">${typeLabel}</div>
+    <div style="font-size:13px;color:var(--text2);margin-bottom:18px">${carName}</div>
+    <div class="detail-row"><div class="detail-label">Data</div><div class="detail-value">${date}</div></div>
+    ${e.km?`<div class="detail-row"><div class="detail-label">Chilometraggio</div><div class="detail-value">${e.km.toLocaleString('it-IT')} km</div></div>`:''}
+    ${e.cost?`<div class="detail-row"><div class="detail-label">Costo</div><div class="detail-value" style="color:var(--accent);font-size:17px;font-weight:700">€${e.cost.toFixed(2)}</div></div>`:''}
+    ${e.recurring?`<div class="detail-row"><div class="detail-label">Ricorrente</div><div class="detail-value" style="color:var(--accent2)">Ogni ${e.recurring.val} ${e.recurring.unit}</div></div>`:''}
+    <div style="margin-top:18px"><div class="detail-label" style="margin-bottom:9px">📝 Note intervento</div>
+    ${e.note&&e.note.trim()?`<div class="detail-note-box">${e.note.trim()}</div>`:`<div class="detail-note-box" style="color:var(--text3);font-style:italic;min-height:60px">Nessuna nota aggiunta</div>`}
+    </div>
+    ${e.olioMode?`<div class="detail-row"><div class="detail-label">Tipo operazione</div><div class="detail-value" style="color:var(--orange)">${e.olioMode==='rabbocco'?'🔻 Rabbocco':'🔄 Cambio completo'}</div></div>`:''}
+    ${e.gommeMode?`<div class="detail-row"><div class="detail-label">Stagione gomme</div><div class="detail-value" style="color:var(--green)">${{'estive':'☀️ Estive','invernali':'❄️ Invernali','4stagioni':'🔄 4 Stagioni'}[e.gommeMode]||e.gommeMode}</div></div>`:''}
+    ${e.gommeMarca||e.gommeMisura?`<div class="detail-row"><div class="detail-label">Gomme</div><div class="detail-value">${[e.gommeMarca,e.gommeMisura].filter(Boolean).join(' · ')}</div></div>`:''}
+    ${e.olioLitri?`<div class="detail-row"><div class="detail-label">Litri olio</div><div class="detail-value">${e.olioLitri}L${e.olioTipo?' · '+e.olioTipo:''}</div></div>`:''}
+    ${e.ricambi&&e.ricambi.length?`<div style="margin-top:16px"><div class="detail-label" style="margin-bottom:8px">🔩 Ricambi utilizzati</div><div style="display:flex;flex-wrap:wrap;gap:4px">${e.ricambi.map(r=>`<span class="tag-ricambio">${r.label}</span>`).join('')}</div></div>`:''}
+    <div class="detail-actions"><button class="btn-secondary" onclick="closeModal('modal-detail-event')">Chiudi</button><button class="btn-primary" style="flex:1;margin-top:0" onclick="closeModal('modal-detail-event');openEditEvent(${idx})">✏️ Modifica</button></div>`;
+  document.getElementById('modal-detail-event').classList.add('open');
+}
+
+// HISTORY RENDER
+function historyItem(e,idx){
+  const car=cars[e.carIdx];
+  const thumb=e.photo?`<div class="history-thumb"><img src="${e.photo}"></div>`:car?.photo?`<div class="history-thumb"><img src="${car.photo}"></div>`:`<div class="history-thumb">${e.type.split(' ')[0]}</div>`;
+  const carLabel=car?`${car.name}${car.plate?' · '+car.plate:''}`:'Veicolo rimosso';
+  const date=e.date?new Date(e.date).toLocaleDateString('it-IT'):'—';
+  const costHtml=e.cost?`<div class="history-cost">€${e.cost.toFixed(0)}</div>`:'';
+  const noteHtml=e.note&&e.note.trim()?`<div class="note-inline">${e.note.trim()}</div>`:'';
+  const olioTag = e.olioMode ? `<span class="tag-ricambio" style="background:rgba(255,149,0,0.12);border-color:rgba(255,149,0,0.3);color:var(--orange)">${e.olioMode==='rabbocco'?'🔻 Rabbocco':'🔄 Cambio completo'}${e.olioLitri?' · '+e.olioLitri+'L':''}${e.olioTipo?' · '+e.olioTipo:''}</span>` : '';
+  const gommeEmoji={'estive':'☀️','invernali':'❄️','4stagioni':'🔄'};
+  const gommeTag = e.gommeMode ? `<span class="tag-ricambio" style="background:rgba(52,199,89,0.1);border-color:rgba(52,199,89,0.3);color:var(--green)">${gommeEmoji[e.gommeMode]||'🦺'} ${e.gommeMode.charAt(0).toUpperCase()+e.gommeMode.slice(1)}${e.gommeMarca?' · '+e.gommeMarca:''}${e.gommeMisura?' · '+e.gommeMisura:''}</span>` : '';
+  const ricambiHtml=(e.ricambi&&e.ricambi.length||olioTag||gommeTag)?`<div style="margin-top:6px;display:flex;flex-wrap:wrap">${olioTag}${gommeTag}${(e.ricambi||[]).map(r=>`<span class="tag-ricambio">🔩 ${r.label}</span>`).join('')}</div>`:'';
+  return`<div class="history-item" onclick="openDetailEvent(${idx})">
+    <div style="flex-shrink:0;margin-top:1px">${thumb}</div>
+    <div class="history-info">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:6px">
+        <div><div class="history-title">${e.type.split(' ').slice(1).join(' ')}${e.recurring?'<span style="font-size:10px;color:var(--accent2);margin-left:4px">🔁</span>':''}</div>
+        <div class="history-meta">${carLabel} · ${date}${e.km?' · '+e.km.toLocaleString('it-IT')+' km':''}</div></div>
+        <div style="display:flex;align-items:center;gap:5px;flex-shrink:0">
+          ${costHtml}
+          <div class="history-actions" onclick="event.stopPropagation()">
+            <button class="btn-icon btn-edit" onclick="openEditEvent(${idx})">✏️</button>
+            <button class="btn-icon btn-delete" onclick="confirmDeleteEvent(${idx})">🗑️</button>
+          </div>
+        </div>
+      </div>
+      ${noteHtml}${ricambiHtml}
+    </div>
+  </div>`;
+}
+function renderHistoryHome(){
+  const c=document.getElementById('history-home');const r=events.slice(0,5);
+  c.innerHTML=r.length?r.map((e,i)=>historyItem(e,i)).join(''):`<div class="empty-state"><div class="emoji">🔧</div><p>Nessun intervento registrato</p></div>`;
+}
+let histFilter='',histTab='all';
+function switchHistTab(tab){
+  histTab=tab;
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+tab).classList.add('active');
+  renderHistoryFull();
+}
+function renderHistoryFull(filter){
+  if(filter!==undefined)histFilter=filter.toLowerCase();
+  const hList=document.getElementById('history-full');
+  const fList=document.getElementById('fuel-full');
+  if(histTab==='fuel'){hList.style.display='none';fList.style.display='flex';}
+  else{hList.style.display='flex';fList.style.display='none';}
+  if(histTab==='fuel'){
+    const ff=histFilter?fuels.filter(f=>{const c=cars[f.carIdx];return(c&&c.name.toLowerCase().includes(histFilter))||(f.type&&f.type.toLowerCase().includes(histFilter));}):fuels;
+    fList.innerHTML=ff.length?ff.map(f=>fuelItem(f,fuels.indexOf(f))).join(''):`<div class="empty-state"><div class="emoji">⛽</div><p>Nessun rifornimento</p></div>`;
+    return;
+  }
+  const filtered=histFilter?events.filter(e=>{const car=cars[e.carIdx];return(car&&car.name.toLowerCase().includes(histFilter))||e.type.toLowerCase().includes(histFilter)||(e.note&&e.note.toLowerCase().includes(histFilter));}):events;
+  hList.innerHTML=filtered.length?filtered.map((e,i)=>historyItem(e,events.indexOf(e))).join(''):`<div class="empty-state"><div class="emoji">📭</div><p>Nessun risultato</p></div>`;
+}
+function filterHistory(val){renderHistoryFull(val);}
+
+// ══════════════════════════════════════════
+// FUEL
+// ══════════════════════════════════════════
+function addFuel(){
+  if(!cars.length){alert('Prima aggiungi un veicolo');return;}
+  const carIdx=parseInt(document.getElementById('fuel-car').value);
+  const f={carIdx,liters:parseFloat(document.getElementById('fuel-liters').value)||0,price:parseFloat(document.getElementById('fuel-price').value)||0,total:parseFloat(document.getElementById('fuel-total').value)||0,km:parseInt(document.getElementById('fuel-km').value)||0,date:document.getElementById('fuel-date').value,type:document.getElementById('fuel-type').value,note:document.getElementById('fuel-note').value};
+  if(!f.total&&f.liters&&f.price)f.total=parseFloat((f.liters*f.price).toFixed(2));
+  fuels.unshift(f);
+  if(f.km>cars[carIdx].km)cars[carIdx].km=f.km;
+  save();closeModal('modal-add-fuel');
+  ['fuel-liters','fuel-price','fuel-total','fuel-km','fuel-note'].forEach(id=>document.getElementById(id).value='');
+  render();showToast('Rifornimento salvato!');
+}
+function deleteFuel(idx){
+  if(!confirm('Eliminare questo rifornimento?'))return;
+  fuels.splice(idx,1);save();renderHistoryFull();showToast('Rifornimento eliminato');
+}
+function fuelItem(f,idx){
+  const car=cars[f.carIdx];
+  const carLabel=car?`${car.name}${car.plate?' · '+car.plate:''}`:'Veicolo rimosso';
+  const date=f.date?new Date(f.date).toLocaleDateString('it-IT'):'—';
+  const costKm=f.km&&f.liters&&f.liters>0?(f.total/f.liters).toFixed(3):'';
+  return`<div class="fuel-item">
+    <div class="fuel-icon">⛽</div>
+    <div class="fuel-info">
+      <div class="fuel-title">${f.type||'Carburante'} · ${f.liters||0}L${costKm?' · €'+costKm+'/L':''}</div>
+      <div class="fuel-meta">${carLabel} · ${date}${f.km?' · '+f.km.toLocaleString('it-IT')+' km':''}${f.note?' · '+f.note:''}</div>
+    </div>
+    ${f.total?`<div class="fuel-cost">€${f.total.toFixed(0)}</div>`:''}
+    <div class="history-actions" onclick="event.stopPropagation()">
+      <button class="btn-icon btn-delete" onclick="deleteFuel(${idx})">🗑️</button>
+    </div>
+  </div>`;
+}
+
+// ══════════════════════════════════════════
+// STATS
+// ══════════════════════════════════════════
+function renderStats(){
+  const container=document.getElementById('stats-content');
+  if(!events.length&&!fuels.length){container.innerHTML=`<div class="empty-state"><div class="emoji">📊</div><p>Aggiungi dati per vedere le statistiche</p></div>`;return;}
+  const totalMaint=events.reduce((s,e)=>s+e.cost,0);
+  const totalFuelCost=fuels.reduce((s,f)=>s+(f.total||0),0);
+  const totalLiters=fuels.reduce((s,f)=>s+(f.liters||0),0);
+  const totalKm=cars.reduce((s,c)=>s+c.km,0);
+  const grandTotal=totalMaint+totalFuelCost;
+
+  // By type
+  const byType={};
+  events.forEach(e=>{const t=e.type.split(' ').slice(1).join(' ');byType[t]=(byType[t]||0)+e.cost;});
+  const sortedType=Object.entries(byType).sort((a,b)=>b[1]-a[1]);const maxT=sortedType[0]?.[1]||1;
+
+  // By car
+  const byCar={};
+  events.forEach(e=>{const c=cars[e.carIdx];if(!c)return;byCar[c.name]=(byCar[c.name]||0)+e.cost;});
+
+  // Monthly trend (last 6 months)
+  const monthlyData={};
+  events.forEach(e=>{if(!e.date)return;const d=new Date(e.date);const key=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;monthlyData[key]=(monthlyData[key]||0)+e.cost;});
+  const months=Object.keys(monthlyData).sort().slice(-6);
+  const maxMonthVal=Math.max(...months.map(m=>monthlyData[m]),1);
+
+  // Fuel stats per car
+  const fuelByCar={};
+  fuels.forEach(f=>{const c=cars[f.carIdx];if(!c)return;if(!fuelByCar[c.name])fuelByCar[c.name]={total:0,liters:0};fuelByCar[c.name].total+=(f.total||0);fuelByCar[c.name].liters+=(f.liters||0);});
+
+  const carPhotos=cars.filter(c=>c.photo).slice(0,5).map(c=>`<img src="${c.photo}" style="width:40px;height:40px;border-radius:50%;object-fit:cover;border:2px solid var(--surface);margin-right:-8px">`).join('');
+
+  container.innerHTML=`
+  <div class="stats-section">
+    <div class="big-stat">
+      ${carPhotos?`<div style="display:flex;margin-bottom:14px;padding-right:8px">${carPhotos}</div>`:''}
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:4px">
+        <div><div class="big-stat-val">€${totalMaint.toFixed(0)}</div><div class="big-stat-lbl">Manutenzione</div></div>
+        <div><div class="big-stat-val" style="color:var(--orange)">€${totalFuelCost.toFixed(0)}</div><div class="big-stat-lbl">Carburante</div></div>
+      </div>
+      <div style="border-top:1px solid var(--border);margin-top:14px;padding-top:14px;display:flex;justify-content:space-between;align-items:center">
+        <div style="font-size:13px;color:var(--text2)">${events.length} interventi · ${fuels.length} rifornimenti · ${totalLiters.toFixed(0)}L</div>
+        <div style="font-size:20px;font-weight:700;color:var(--accent2)">€${grandTotal.toFixed(0)}</div>
+      </div>
+    </div>
+
+    ${months.length?`<div class="stats-section-title">📈 Trend mensile</div>
+    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:20px">
+      <div style="display:flex;align-items:flex-end;gap:6px;height:80px">
+        ${months.map(m=>{const v=monthlyData[m];const h=Math.max(8,(v/maxMonthVal)*72);const lbl=m.split('-')[1]+'/'+m.split('-')[0].slice(2);return`<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px"><div style="width:100%;background:linear-gradient(180deg,var(--accent),var(--accent2));border-radius:4px 4px 0 0;height:${h}px"></div><div style="font-size:9px;color:var(--text3)">${lbl}</div></div>`;}).join('')}
+      </div>
+    </div>`:'' }
+
+    <div class="stats-section-title">🔧 Per tipo intervento</div>
+    ${sortedType.map(([t,cost])=>`<div class="progress-row"><div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px"><span>${t}</span><span style="font-weight:600;color:var(--accent)">€${cost.toFixed(0)}</span></div><div class="progress-bar"><div class="progress-fill" style="width:${(cost/maxT*100).toFixed(0)}%"></div></div></div>`).join('')}
+
+    ${Object.keys(byCar).length?`<div class="stats-section-title" style="margin-top:20px">🚗 Per veicolo (manutenzione)</div>
+    ${Object.entries(byCar).sort((a,b)=>b[1]-a[1]).map(([name,cost])=>{const car=cars.find(c=>c.name===name);return`<div class="stat-chip"><div class="stat-chip-icon" style="background:var(--surface3)">${car?.photo?`<img src="${car.photo}" style="width:36px;height:36px;border-radius:9px;object-fit:cover">`:'🚗'}</div><span style="flex:1;font-size:14px">${name}</span><span style="font-size:14px;font-weight:700;color:var(--accent)">€${cost.toFixed(0)}</span></div>`;}).join('')}`:''}
+
+    ${Object.keys(fuelByCar).length?`<div class="stats-section-title" style="margin-top:20px">⛽ Carburante per veicolo</div>
+    ${Object.entries(fuelByCar).sort((a,b)=>b[1].total-a[1].total).map(([name,d])=>{const car=cars.find(c=>c.name===name);return`<div class="stat-chip"><div class="stat-chip-icon" style="background:rgba(255,149,0,0.12)">${car?.photo?`<img src="${car.photo}" style="width:36px;height:36px;border-radius:9px;object-fit:cover">`:'⛽'}</div><div style="flex:1"><div style="font-size:14px">${name}</div><div style="font-size:11px;color:var(--text2);margin-top:1px">${d.liters.toFixed(0)}L</div></div><span style="font-size:14px;font-weight:700;color:var(--orange)">€${d.total.toFixed(0)}</span></div>`;}).join('')}`:''}
+    <div style="height:20px"></div>
+  </div>`;
+}
+
+// ══════════════════════════════════════════
+// PRINT
+// ══════════════════════════════════════════
+function printHistory(){
+  const now=new Date().toLocaleDateString('it-IT',{day:'2-digit',month:'long',year:'numeric'});
+  document.getElementById('print-meta').textContent=`Stampato il ${now} · ${events.length} interventi · ${cars.length} veicoli`;
+  const grouped={};cars.forEach((c,i)=>{grouped[i]=[];});
+  events.forEach(e=>{if(grouped[e.carIdx]!==undefined)grouped[e.carIdx].push(e);});
+  let html='';
+  cars.forEach((car,carIdx)=>{
+    const evs=grouped[carIdx];if(!evs.length)return;
+    const total=evs.reduce((s,e)=>s+e.cost,0);
+    html+=`<div class="print-car-section"><div class="print-car-title">🚗 ${car.name}${car.plate?' — '+car.plate:''}${car.year?' ('+car.year+')':''}</div>
+    <table><thead><tr><th>Data</th><th>Intervento</th><th>Note</th><th>Km</th><th>Costo</th></tr></thead><tbody>
+    ${evs.map(e=>`<tr><td>${e.date?new Date(e.date).toLocaleDateString('it-IT'):'—'}</td><td>${e.type.split(' ').slice(1).join(' ')}</td><td>${e.note||'—'}</td><td>${e.km?e.km.toLocaleString('it-IT')+' km':'—'}</td><td>${e.cost?'€'+e.cost.toFixed(2):'—'}</td></tr>`).join('')}
+    </tbody></table><div class="print-total">Totale manutenzione: €${total.toFixed(2)}</div></div>`;
+  });
+  const grandTotal=events.reduce((s,e)=>s+e.cost,0);
+  html+=`<div style="text-align:right;font-size:14px;font-weight:700;margin-top:12px;padding-top:10px;border-top:2px solid #333">Totale generale: €${grandTotal.toFixed(2)}</div>`;
+  document.getElementById('print-content').innerHTML=html;
+  window.print();
+}
+
+// ══════════════════════════════════════════
+// QUICK STATS
+// ══════════════════════════════════════════
+function updateQuickStats(){
+  document.getElementById('qs-cars').textContent=cars.length;
+  const total=events.reduce((s,e)=>s+e.cost,0)+fuels.reduce((s,f)=>s+(f.total||0),0);
+  document.getElementById('qs-cost').textContent='€'+(total>=1000?(total/1000).toFixed(1)+'k':total.toFixed(0));
+}
+
+// ══════════════════════════════════════════
+// TOAST
+// ══════════════════════════════════════════
+function showToast(msg){
+  const t=document.getElementById('toast');t.textContent='✓ '+msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2500);
+}
+
+// ══════════════════════════════════════════
+// RICAMBI
+// ══════════════════════════════════════════
+const RICAMBI_BASE = {
+  '🔩 Tagliando': [
+    {id:'olio',label:'Olio motore'},
+    {id:'filtro_olio',label:'Filtro olio'},
+    {id:'filtro_aria',label:'Filtro aria'},
+    {id:'filtro_abitacolo',label:'Filtro abitacolo'},
+    {id:'filtro_gasolio',label:'Filtro gasolio'},
+    {id:'candele',label:'Candele'},
+    {id:'cinghia',label:'Cinghia distribuzione'},
+    {id:'liquido_freni',label:'Liquido freni'},
+    {id:'liquido_raffreddamento',label:'Liquido raffreddamento'},
+    {id:'spazzole',label:'Spazzole tergicristallo'},
+  ],
+  '🛢️ Cambio olio': [
+    {id:'olio',label:'Olio motore'},
+    {id:'filtro_olio',label:'Filtro olio'},
+    {id:'guarnizione',label:'Guarnizione tappo'},
+  ],
+  '⚙️ Freni': [
+    {id:'pastiglie_ant',label:'Pastiglie anteriori'},
+    {id:'pastiglie_post',label:'Pastiglie posteriori'},
+    {id:'dischi_ant',label:'Dischi anteriori'},
+    {id:'dischi_post',label:'Dischi posteriori'},
+    {id:'liquido_freni',label:'Liquido freni'},
+  ],
+  '🦺 Gomme': [
+    {id:'gomme_ant',label:'Gomme anteriori'},
+    {id:'gomme_post',label:'Gomme posteriori'},
+    {id:'gomme_4',label:'4 gomme'},
+    {id:'equilibratura',label:'Equilibratura'},
+    {id:'convergenza',label:'Convergenza'},
+  ],
+  '🔋 Batteria': [
+    {id:'batteria',label:'Batteria'},
+    {id:'alternatore',label:'Alternatore'},
+    {id:'motorino',label:'Motorino avviamento'},
+  ],
+};
+
+let pendingRicambi = []; // {id, label} — for add modal
+let editRicambi = [];    // for edit modal
+let pendingOlioMode = 'cambio';
+let editOlioMode = 'cambio';
+
+function getRicambiForType(type) {
+  return RICAMBI_BASE[type] || [];
+}
+
+function showRicambiSection(type, mode) {
+  const sectionId = mode==='edit' ? 'edit-ricambi-section' : 'ricambi-section';
+  const gridId    = mode==='edit' ? 'edit-ricambi-grid'    : 'ricambi-grid';
+  const section   = document.getElementById(sectionId);
+  const grid      = document.getElementById(gridId);
+  const base      = getRicambiForType(type);
+  const current   = mode==='edit' ? editRicambi : pendingRicambi;
+  const prefix    = mode==='edit' ? 'edit-' : '';
+
+  // Show/hide olio section
+  const olioTypes = ['🛢️ Cambio olio','🔩 Tagliando'];
+  const olioSection = document.getElementById(prefix+'olio-section');
+  if (olioSection) olioSection.classList.toggle('visible', olioTypes.includes(type));
+  const gommeSection = document.getElementById(prefix+'gomme-section');
+  if (gommeSection) gommeSection.classList.toggle('visible', type==='🦺 Gomme');
+
+  const showTypes = Object.keys(RICAMBI_BASE);
+  if (!showTypes.includes(type) && current.length === 0) {
+    section.classList.remove('visible');
+    return;
+  }
+  section.classList.add('visible');
+
+  // Merge base + any already-selected custom items
+  const customItems = current.filter(r => !base.find(b => b.id === r.id));
+  const allItems = [...base, ...customItems];
+
+  grid.innerHTML = allItems.map(r => {
+    const checked = current.find(c => c.id === r.id);
+    return `<div class="ricambi-item${checked?' checked':''}" onclick="toggleRicambio('${r.id}','${r.label}','${mode}',this)">
+      <div class="ricambi-check">${checked?'✓':''}</div>
+      <span class="ricambi-label">${r.label}</span>
+    </div>`;
+  }).join('');
+}
+
+function toggleRicambio(id, label, mode, el) {
+  const arr = mode==='edit' ? editRicambi : pendingRicambi;
+  const idx = arr.findIndex(r => r.id === id);
+  if (idx >= 0) { arr.splice(idx, 1); el.classList.remove('checked'); el.querySelector('.ricambi-check').textContent=''; }
+  else { arr.push({id, label}); el.classList.add('checked'); el.querySelector('.ricambi-check').textContent='✓'; }
+}
+
+function addCustomRicambio(mode) {
+  const inputId = mode==='edit' ? 'edit-ricambio-custom' : 'ricambio-custom';
+  const input   = document.getElementById(inputId);
+  const val     = input.value.trim();
+  if (!val) return;
+  const id = 'custom_' + Date.now();
+  const arr = mode==='edit' ? editRicambi : pendingRicambi;
+  arr.push({id, label: val});
+  input.value = '';
+  // Re-render grid with new item added
+  const type = document.getElementById(mode==='edit'?'edit-event-type':'event-type').value;
+  showRicambiSection(type, mode);
+}
+
+// Listen for type changes
+let pendingGommeMode = 'estive';
+let editGommeMode   = 'estive';
+
+function setGommeMode(mode, ctx) {
+  const prefix = ctx==='edit' ? 'edit-' : '';
+  ['estive','invernali','4stagioni'].forEach(m => {
+    document.getElementById(prefix+'gomme-btn-'+m).classList.toggle('active', m===mode);
+  });
+  if (ctx==='edit') editGommeMode=mode; else pendingGommeMode=mode;
+}
+
+function setOlioMode(mode, ctx) {
+  const prefix = ctx==='edit' ? 'edit-' : '';
+  document.getElementById(prefix+'olio-btn-cambio').classList.toggle('active', mode==='cambio');
+  document.getElementById(prefix+'olio-btn-rabbocco').classList.toggle('active', mode==='rabbocco');
+  // On rabbocco: hide full ricambi (olio motore stays, rest hidden), just show litri
+  const wrapId = prefix + 'olio-litri-wrap';
+  document.getElementById(wrapId).style.display = 'block';
+  // store mode
+  if (ctx==='edit') editOlioMode = mode; else pendingOlioMode = mode;
+  // rabbocco: hide ricambi base except olio
+  const gridId = prefix + 'ricambi-grid';
+  const grid = document.getElementById(gridId);
+  if (!grid) return;
+  if (mode==='rabbocco') {
+    // only show olio motore chip
+    grid.querySelectorAll('.ricambi-item').forEach(el => {
+      const lbl = el.querySelector('.ricambi-label').textContent;
+      el.style.display = ['Olio motore'].includes(lbl) ? '' : 'none';
+    });
+  } else {
+    grid.querySelectorAll('.ricambi-item').forEach(el => el.style.display = '');
+  }
+}
+
+document.getElementById('event-type').addEventListener('change', function(){
+  pendingRicambi = [];
+  showRicambiSection(this.value, 'add');
+});
+document.getElementById('edit-event-type').addEventListener('change', function(){
+  editRicambi = [];
+  showRicambiSection(this.value, 'edit');
+});
+
+// ══════════════════════════════════════════
+// RENDER ALL
+// ══════════════════════════════════════════
+function render(){
+  renderCars();renderAlerts();renderScheduled();renderHistoryHome();updateQuickStats();updateGreeting();
+}
+render();
+</script>
 </body>
 </html>
