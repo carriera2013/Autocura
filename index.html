@@ -5,16 +5,26 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>AutoCura</title>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<!-- PWA -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="AutoCura">
+<meta name="theme-color" content="#0a0a0f">
+<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%230a0a0f'/><text y='.9em' font-size='80' x='10'>🚗</text></svg>">
 <style>
 :root {
-  --bg:#0a0a0f; --surface:#14141e; --surface2:#1c1c2e; --surface3:#242438;
-  --accent:#4f8ef7; --accent2:#7c5cfc; --green:#34c759; --orange:#ff9500; --red:#ff3b30; --yellow:#ffd60a;
-  --text:#f0f0f8; --text2:#9090b0; --text3:#606080;
-  --border:rgba(255,255,255,0.07); --radius:18px; --radius-sm:12px;
+  --bg:#08080f; --surface:#111118; --surface2:#181824; --surface3:#20202e;
+  --accent:#5b9cf7; --accent2:#8b6bf8; --green:#30d158; --orange:#ff9f0a; --red:#ff453a; --yellow:#ffd60a;
+  --text:#f2f2fa; --text2:#8e8eaa; --text3:#58586a;
+  --border:rgba(255,255,255,0.06); --radius:20px; --radius-sm:13px;
+  --glass:rgba(255,255,255,0.03);
+  --shadow:0 8px 32px rgba(0,0,0,0.4);
+  --shadow-sm:0 4px 16px rgba(0,0,0,0.3);
 }
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;max-width:430px;margin:0 auto;overflow-x:hidden;padding-bottom:90px;}
-body::before{content:'';position:fixed;top:-200px;left:-100px;width:500px;height:500px;background:radial-gradient(circle,rgba(79,142,247,0.1) 0%,transparent 70%);pointer-events:none;z-index:0;}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;max-width:430px;margin:0 auto;overflow-x:hidden;padding-bottom:90px;-webkit-font-smoothing:antialiased;}
+body::before{content:'';position:fixed;top:-150px;left:-120px;width:520px;height:520px;background:radial-gradient(circle,rgba(91,156,247,0.13) 0%,transparent 65%);pointer-events:none;z-index:0;}
+body::after{content:'';position:fixed;bottom:-100px;right:-80px;width:360px;height:360px;background:radial-gradient(circle,rgba(139,107,248,0.08) 0%,transparent 65%);pointer-events:none;z-index:0;}
 /* HEADER */
 .header{padding:52px 24px 14px;position:relative;z-index:1;}
 .header-top{display:flex;justify-content:space-between;align-items:flex-start;}
@@ -22,7 +32,7 @@ body::before{content:'';position:fixed;top:-200px;left:-100px;width:500px;height
 .title{font-size:26px;font-weight:700;letter-spacing:-0.5px;}
 .title span{background:linear-gradient(135deg,#4f8ef7,#7c5cfc);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
 .header-btns{display:flex;gap:10px;align-items:center;}
-.add-btn{width:40px;height:40px;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;border-radius:50%;color:white;font-size:22px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(79,142,247,0.4);transition:transform 0.15s;flex-shrink:0;}
+.add-btn{width:42px;height:42px;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;border-radius:50%;color:white;font-size:22px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 24px rgba(91,156,247,0.45);transition:transform 0.18s,box-shadow 0.18s;flex-shrink:0;}
 .add-btn:active{transform:scale(0.9);}
 .icon-btn{width:40px;height:40px;background:var(--surface2);border:1px solid var(--border);border-radius:50%;color:var(--text);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform 0.15s;flex-shrink:0;}
 .icon-btn:active{transform:scale(0.9);}
@@ -44,7 +54,7 @@ body::before{content:'';position:fixed;top:-200px;left:-100px;width:500px;height
 /* CAR CARDS */
 .cars-scroll{display:flex;gap:14px;padding:0 24px;overflow-x:auto;scrollbar-width:none;}
 .cars-scroll::-webkit-scrollbar{display:none;}
-.car-card{min-width:190px;width:190px;background:var(--surface2);border-radius:var(--radius);border:1px solid var(--border);cursor:pointer;transition:transform 0.2s;position:relative;overflow:hidden;flex-shrink:0;}
+.car-card{min-width:192px;width:192px;background:var(--surface2);border-radius:var(--radius);border:1px solid var(--border);cursor:pointer;transition:transform 0.22s,box-shadow 0.22s;position:relative;overflow:hidden;flex-shrink:0;box-shadow:var(--shadow-sm);}
 .car-card:active{transform:scale(0.97);}
 .car-card.selected{border-color:rgba(79,142,247,0.6);}
 .car-photo-wrap{width:100%;height:110px;background:var(--surface3);position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;}
@@ -97,7 +107,7 @@ body::before{content:'';position:fixed;top:-200px;left:-100px;width:500px;height
 .fuel-meta{font-size:12px;color:var(--text2);}
 .fuel-cost{font-size:13px;font-weight:700;color:var(--orange);white-space:nowrap;}
 /* BOTTOM NAV */
-.bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:rgba(20,20,30,0.92);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-around;padding:10px 0 26px;z-index:100;}
+.bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:rgba(8,8,15,0.88);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-around;padding:10px 0 28px;z-index:100;}
 .nav-item{display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding:4px 12px;}
 .nav-icon{font-size:20px;}
 .nav-label{font-size:10px;font-weight:500;color:var(--text3);}
@@ -105,7 +115,7 @@ body::before{content:'';position:fixed;top:-200px;left:-100px;width:500px;height
 /* MODAL */
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.75);backdrop-filter:blur(8px);z-index:200;display:flex;align-items:flex-end;opacity:0;pointer-events:none;transition:opacity 0.3s;}
 .modal-overlay.open{opacity:1;pointer-events:all;}
-.modal{background:var(--surface);border-radius:24px 24px 0 0;width:100%;max-width:430px;margin:0 auto;padding:20px 24px 44px;transform:translateY(100%);transition:transform 0.35s cubic-bezier(0.32,0.72,0,1);max-height:88vh;overflow-y:auto;}
+.modal{background:var(--surface);border-radius:26px 26px 0 0;width:100%;max-width:430px;margin:0 auto;padding:20px 24px 48px;transform:translateY(100%);transition:transform 0.38s cubic-bezier(0.32,0.72,0,1);max-height:90vh;overflow-y:auto;}
 .modal-overlay.open .modal{transform:translateY(0);}
 .modal-handle{width:36px;height:4px;background:var(--surface3);border-radius:2px;margin:0 auto 20px;}
 .modal-title{font-size:20px;font-weight:700;margin-bottom:20px;}
@@ -184,6 +194,34 @@ body::before{content:'';position:fixed;top:-200px;left:-100px;width:500px;height
 }
 #print-area{display:none;}
 @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes slideIn{from{opacity:0;transform:translateX(16px)}to{opacity:1;transform:translateX(0)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.5}}
+/* Install banner */
+.install-banner{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);width:calc(100% - 32px);max-width:398px;background:linear-gradient(135deg,rgba(91,156,247,0.15),rgba(139,107,248,0.15));border:1px solid rgba(91,156,247,0.3);border-radius:var(--radius);padding:14px 16px;z-index:150;backdrop-filter:blur(12px);display:none;animation:fadeUp 0.4s ease;}
+.install-banner.show{display:flex;align-items:center;gap:12px;}
+.install-banner-icon{font-size:28px;flex-shrink:0;}
+.install-banner-text{flex:1;}
+.install-banner-title{font-size:14px;font-weight:700;margin-bottom:2px;}
+.install-banner-sub{font-size:12px;color:var(--text2);}
+.install-banner-close{font-size:18px;color:var(--text3);cursor:pointer;padding:4px;}
+/* Notification badge */
+.notif-dot{width:8px;height:8px;background:var(--red);border-radius:50%;position:absolute;top:2px;right:2px;border:2px solid var(--bg);animation:pulse 2s infinite;}
+/* Km chart */
+.km-chart{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:18px;margin-bottom:20px;overflow:hidden;}
+.km-chart-title{font-size:14px;font-weight:600;margin-bottom:14px;color:var(--text2);}
+.km-chart-bars{display:flex;align-items:flex-end;gap:5px;height:90px;}
+.km-bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;}
+.km-bar{width:100%;border-radius:5px 5px 0 0;background:linear-gradient(180deg,var(--accent),var(--accent2));transition:height 0.5s ease;min-height:4px;}
+.km-bar-lbl{font-size:9px;color:var(--text3);text-align:center;white-space:nowrap;}
+.km-bar-val{font-size:9px;color:var(--text2);font-weight:600;}
+/* Swipe hint */
+.swipe-hint{font-size:11px;color:var(--text3);text-align:center;padding:4px 0 8px;animation:pulse 3s infinite;}
+/* Better empty states */
+.empty-state{text-align:center;padding:32px 24px;color:var(--text3);}
+.empty-state .emoji{font-size:44px;margin-bottom:10px;display:block;}
+.empty-state p{font-size:14px;line-height:1.5;}
+/* Alert pill */
+.alert-count-pill{background:var(--red);color:white;border-radius:20px;padding:1px 7px;font-size:10px;font-weight:700;margin-left:6px;}
 .section{animation:fadeUp 0.3s ease both;}
 .section:nth-child(3){animation-delay:0.04s}.section:nth-child(4){animation-delay:0.08s}.section:nth-child(5){animation-delay:0.12s}
 input[type="file"]{display:none;}
@@ -216,6 +254,15 @@ input[type="file"]{display:none;}
 <body>
 
 <div class="toast" id="toast"></div>
+<!-- Install banner -->
+<div class="install-banner" id="install-banner">
+  <div class="install-banner-icon">📱</div>
+  <div class="install-banner-text">
+    <div class="install-banner-title">Aggiungi alla schermata Home</div>
+    <div class="install-banner-sub">Tocca <strong>Condividi</strong> → <strong>Aggiungi a Home</strong> per usarla come app</div>
+  </div>
+  <div class="install-banner-close" onclick="dismissInstallBanner()">✕</div>
+</div>
 <!-- Hidden file inputs -->
 <input type="file" id="file-car-photo" accept="image/*" onchange="handleCarPhotoModal(event)">
 <input type="file" id="file-card-photo" accept="image/*">
@@ -232,6 +279,7 @@ input[type="file"]{display:none;}
     <div class="header-top">
       <div><div class="greeting" id="main-greeting" onclick="openModal('modal-username')">Bentornato 👋</div><div class="title">Le tue <span>Auto</span></div></div>
       <div class="header-btns">
+        <button class="icon-btn" onclick="openModal('modal-install')" title="Installa su iPhone" style="position:relative">📲<div class="notif-dot" id="install-dot" style="display:none"></div></button>
         <button class="add-btn" onclick="openModal('modal-add-car')">+</button>
       </div>
     </div>
@@ -602,6 +650,7 @@ let events   = JSON.parse(localStorage.getItem('autocura_events')    || '[]');
 let fuels    = JSON.parse(localStorage.getItem('autocura_fuels')     || '[]');
 let scheduled= JSON.parse(localStorage.getItem('autocura_scheduled') || '[]');
 let username = localStorage.getItem('autocura_username') || '';
+let kmLog    = JSON.parse(localStorage.getItem('autocura_kmlog') || '[]'); // [{carIdx, km, date, label}]
 let pendingCarPhoto = null;
 let editingCarPhoto = null;
 let pendingEventPhoto = null;
@@ -612,6 +661,7 @@ function save() {
   localStorage.setItem('autocura_events',    JSON.stringify(events));
   localStorage.setItem('autocura_fuels',     JSON.stringify(fuels));
   localStorage.setItem('autocura_scheduled', JSON.stringify(scheduled));
+  localStorage.setItem('autocura_kmlog', JSON.stringify(kmLog));
 }
 
 // ══════════════════════════════════════════
@@ -953,7 +1003,8 @@ function addEvent(){
     recurring:recurring?{val:parseInt(document.getElementById('event-recur-val').value)||12,unit:document.getElementById('event-recur-unit').value}:null
   };
   events.unshift(ev);
-  if(ev.km>cars[carIdx].km)cars[carIdx].km=ev.km;
+  if (ev.km > 0) kmLog.push({carIdx, km:ev.km, date:ev.date, label:ev.type.split(' ').slice(1).join(' ')});
+  syncCarKm(carIdx);
   // If recurring, auto-create scheduled entry
   if(ev.recurring&&ev.date){
     const nextDate=new Date(ev.date);
@@ -1012,18 +1063,19 @@ function saveEditEvent(){
   e.cost=parseFloat(document.getElementById('edit-event-cost').value)||0;
   e.km=parseInt(document.getElementById('edit-event-km').value)||0;
   if(editingEventPhoto)e.photo=editingEventPhoto;
+  syncAllCarsKm();
   save();closeModal('modal-edit-event');editingEventIdx=null;editingEventPhoto=null;
   render();renderHistoryFull();showToast('Intervento aggiornato!');
 }
 function deleteEvent(){
   if(editingEventIdx===null)return;
   if(!confirm('Eliminare questo intervento?'))return;
-  events.splice(editingEventIdx,1);save();closeModal('modal-edit-event');editingEventIdx=null;
+  events.splice(editingEventIdx,1);syncAllCarsKm();save();closeModal('modal-edit-event');editingEventIdx=null;
   render();renderHistoryFull();showToast('Intervento eliminato');
 }
 function confirmDeleteEvent(idx){
   if(!confirm('Eliminare questo intervento?'))return;
-  events.splice(idx,1);save();render();renderHistoryFull();showToast('Intervento eliminato');
+  events.splice(idx,1);syncAllCarsKm();save();render();renderHistoryFull();showToast('Intervento eliminato');
 }
 
 // DETAIL
@@ -1121,14 +1173,15 @@ function addFuel(){
   const f={carIdx,liters:parseFloat(document.getElementById('fuel-liters').value)||0,price:parseFloat(document.getElementById('fuel-price').value)||0,total:parseFloat(document.getElementById('fuel-total').value)||0,km:parseInt(document.getElementById('fuel-km').value)||0,date:document.getElementById('fuel-date').value,type:document.getElementById('fuel-type').value,note:document.getElementById('fuel-note').value};
   if(!f.total&&f.liters&&f.price)f.total=parseFloat((f.liters*f.price).toFixed(2));
   fuels.unshift(f);
-  if(f.km>cars[carIdx].km)cars[carIdx].km=f.km;
+  if (f.km > 0) kmLog.push({carIdx, km:f.km, date:f.date, label:'⛽ '+f.type});
+  syncCarKm(carIdx);
   save();closeModal('modal-add-fuel');
   ['fuel-liters','fuel-price','fuel-total','fuel-km','fuel-note'].forEach(id=>document.getElementById(id).value='');
   render();showToast('Rifornimento salvato!');
 }
 function deleteFuel(idx){
   if(!confirm('Eliminare questo rifornimento?'))return;
-  fuels.splice(idx,1);save();renderHistoryFull();showToast('Rifornimento eliminato');
+  fuels.splice(idx,1);syncAllCarsKm();save();render();renderHistoryFull();showToast('Rifornimento eliminato');
 }
 function fuelItem(f,idx){
   const car=cars[f.carIdx];
@@ -1210,6 +1263,7 @@ function renderStats(){
 
     ${Object.keys(fuelByCar).length?`<div class="stats-section-title" style="margin-top:20px">⛽ Carburante per veicolo</div>
     ${Object.entries(fuelByCar).sort((a,b)=>b[1].total-a[1].total).map(([name,d])=>{const car=cars.find(c=>c.name===name);return`<div class="stat-chip"><div class="stat-chip-icon" style="background:rgba(255,149,0,0.12)">${car?.photo?`<img src="${car.photo}" style="width:36px;height:36px;border-radius:9px;object-fit:cover">`:'⛽'}</div><div style="flex:1"><div style="font-size:14px">${name}</div><div style="font-size:11px;color:var(--text2);margin-top:1px">${d.liters.toFixed(0)}L</div></div><span style="font-size:14px;font-weight:700;color:var(--orange)">€${d.total.toFixed(0)}</span></div>`;}).join('')}`:''}
+    ${renderKmChartHTML()}
     <div style="height:20px"></div>
   </div>`;
 }
@@ -1408,12 +1462,171 @@ document.getElementById('edit-event-type').addEventListener('change', function()
 });
 
 // ══════════════════════════════════════════
+// INSTALL BANNER
+// ══════════════════════════════════════════
+function checkInstallBanner() {
+  const dismissed = localStorage.getItem('autocura_install_dismissed');
+  const isStandalone = window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches;
+  if (!isStandalone && !dismissed) {
+    setTimeout(() => document.getElementById('install-banner').classList.add('show'), 3000);
+  }
+}
+function dismissInstallBanner() {
+  document.getElementById('install-banner').classList.remove('show');
+  localStorage.setItem('autocura_install_dismissed', '1');
+}
+
+// ══════════════════════════════════════════
+// NOTIFICATIONS
+// ══════════════════════════════════════════
+function checkNotifications() {
+  const isStandalone = window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches;
+  if (!isStandalone) return;
+  if (!('Notification' in window)) return;
+  if (Notification.permission === 'default') {
+    setTimeout(() => {
+      if (confirm('AutoCura può inviarti notifiche per le scadenze (revisione, assicurazione). Vuoi attivare le notifiche?')) {
+        Notification.requestPermission().then(p => {
+          if (p === 'granted') fireDeadlineNotifications();
+        });
+      }
+    }, 2000);
+  } else if (Notification.permission === 'granted') {
+    fireDeadlineNotifications();
+  }
+}
+function fireDeadlineNotifications() {
+  const today = new Date();
+  const lastCheck = localStorage.getItem('autocura_last_notif_check');
+  const todayStr = today.toDateString();
+  if (lastCheck === todayStr) return; // once per day
+  localStorage.setItem('autocura_last_notif_check', todayStr);
+  cars.forEach(car => {
+    const checkDate = (label, ds) => {
+      if (!ds) return;
+      const diff = Math.round((new Date(ds) - today) / 86400000);
+      if (diff >= 0 && diff <= 30) {
+        new Notification('AutoCura — ' + car.name, {
+          body: label + ' scade tra ' + diff + ' giorni (' + new Date(ds).toLocaleDateString('it-IT') + ')',
+          icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">🚗</text></svg>'
+        });
+      } else if (diff < 0) {
+        new Notification('AutoCura — SCADUTO: ' + car.name, {
+          body: label + ' è scaduta il ' + new Date(ds).toLocaleDateString('it-IT'),
+          icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">⚠️</text></svg>'
+        });
+      }
+    };
+    checkDate('Revisione', car.revision);
+    checkDate('Assicurazione', car.insurance);
+  });
+}
+
+// ══════════════════════════════════════════
+// KM CHART
+// ══════════════════════════════════════════
+function renderKmChartHTML() {
+  if (!kmLog.length && !cars.length) return '';
+  // Group km by month, take max km across all cars
+  const byMonth = {};
+  kmLog.forEach(entry => {
+    if (!entry.date || !entry.km) return;
+    const d = new Date(entry.date);
+    const key = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0');
+    if (!byMonth[key] || entry.km > byMonth[key]) byMonth[key] = entry.km;
+  });
+  // Also add current km for latest month
+  const now = new Date();
+  const currentKey = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0');
+  cars.forEach(c => { if (c.km && (!byMonth[currentKey] || c.km > byMonth[currentKey])) byMonth[currentKey] = c.km; });
+
+  const months = Object.keys(byMonth).sort().slice(-8);
+  if (months.length < 2) return '';
+
+  const vals = months.map(m => byMonth[m]);
+  const maxVal = Math.max(...vals);
+  const minVal = Math.min(...vals);
+  const range = maxVal - minVal || 1;
+  const totalKmPeriod = maxVal - vals[0];
+
+  const bars = months.map((m, i) => {
+    const v = vals[i];
+    const h = Math.max(10, Math.round(((v - minVal) / range) * 72) + 10);
+    const lbl = m.split('-')[1] + '/' + m.split('-')[0].slice(2);
+    const valK = v >= 1000 ? (v/1000).toFixed(0)+'k' : v;
+    return `<div class="km-bar-wrap"><div class="km-bar-val">${i===months.length-1?valK:''}</div><div class="km-bar" style="height:${h}px"></div><div class="km-bar-lbl">${lbl}</div></div>`;
+  }).join('');
+
+  return `<div class="km-chart">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <div class="km-chart-title">⏱️ Andamento chilometraggio</div>
+      ${totalKmPeriod > 0 ? `<div style="font-size:12px;color:var(--green);font-weight:600">+${totalKmPeriod.toLocaleString('it-IT')} km</div>` : ''}
+    </div>
+    <div class="km-chart-bars">${bars}</div>
+    <div style="display:flex;justify-content:space-between;margin-top:10px;font-size:11px;color:var(--text3)">
+      <span>Min: ${minVal.toLocaleString('it-IT')} km</span>
+      <span>Max: ${maxVal.toLocaleString('it-IT')} km</span>
+    </div>
+  </div>`;
+}
+
+// ══════════════════════════════════════════
+// KM SYNC — ricalcola il km massimo del veicolo da tutti gli interventi e rifornimenti
+// ══════════════════════════════════════════
+function syncCarKm(carIdx) {
+  let maxKm = cars[carIdx].km || 0;
+  events.forEach(e => { if (e.carIdx === carIdx && e.km > maxKm) maxKm = e.km; });
+  fuels.forEach(f  => { if (f.carIdx === carIdx && f.km  > maxKm) maxKm = f.km;  });
+  cars[carIdx].km = maxKm;
+}
+function syncAllCarsKm() {
+  cars.forEach((c, i) => syncCarKm(i));
+}
+
+// ══════════════════════════════════════════
 // RENDER ALL
 // ══════════════════════════════════════════
 function render(){
   renderCars();renderAlerts();renderScheduled();renderHistoryHome();updateQuickStats();updateGreeting();
 }
+syncAllCarsKm();
 render();
+checkInstallBanner();
+checkNotifications();
+// Show install dot if not standalone
+(function(){
+  const isStandalone = window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches;
+  if (!isStandalone) { const d = document.getElementById('install-dot'); if(d) d.style.display='block'; }
+})();
 </script>
+
+<!-- MODAL: INSTALL GUIDE -->
+<div class="modal-overlay" id="modal-install" onclick="closeModalOutside(event,'modal-install')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">📱 Installa su iPhone</div>
+    <p style="font-size:14px;color:var(--text2);margin-bottom:20px;line-height:1.6">Per usare AutoCura come app vera sul tuo iPhone, segui questi 3 passi:</p>
+    <div style="display:flex;flex-direction:column;gap:14px;margin-bottom:24px">
+      <div style="display:flex;gap:14px;align-items:flex-start;background:var(--surface2);border-radius:var(--radius-sm);padding:14px">
+        <div style="width:32px;height:32px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:white;flex-shrink:0">1</div>
+        <div><div style="font-size:14px;font-weight:600;margin-bottom:3px">Apri in Safari</div><div style="font-size:13px;color:var(--text2)">Assicurati di usare Safari (non Chrome o altri browser)</div></div>
+      </div>
+      <div style="display:flex;gap:14px;align-items:flex-start;background:var(--surface2);border-radius:var(--radius-sm);padding:14px">
+        <div style="width:32px;height:32px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:white;flex-shrink:0">2</div>
+        <div><div style="font-size:14px;font-weight:600;margin-bottom:3px">Tocca Condividi ↑</div><div style="font-size:13px;color:var(--text2)">Il tasto con la freccia in basso nella barra Safari</div></div>
+      </div>
+      <div style="display:flex;gap:14px;align-items:flex-start;background:var(--surface2);border-radius:var(--radius-sm);padding:14px">
+        <div style="width:32px;height:32px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:white;flex-shrink:0">3</div>
+        <div><div style="font-size:14px;font-weight:600;margin-bottom:3px">Aggiungi a schermata Home</div><div style="font-size:13px;color:var(--text2)">Scorri il menu e tocca "Aggiungi a schermata Home", poi "Aggiungi"</div></div>
+      </div>
+    </div>
+    <div style="background:rgba(91,156,247,0.08);border:1px solid rgba(91,156,247,0.2);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:16px">
+      <div style="font-size:13px;color:var(--accent);font-weight:600;margin-bottom:3px">🔔 Notifiche scadenze</div>
+      <div style="font-size:12px;color:var(--text2)">Una volta installata, l'app ti avviserà delle scadenze imminenti (iOS 16.4+)</div>
+    </div>
+    <button class="btn-primary" onclick="closeModal('modal-install')">Capito!</button>
+  </div>
+</div>
+
 </body>
 </html>
